@@ -4,22 +4,15 @@
       <h2>FERIADOS</h2>
     </div>
     <hr />
-    <b-button
-      variant="primary"
-      @click="$bvModal.show('modalCadastro')"
-      class="mb-2"
+    <b-button variant="primary" @click="abrirModal" class="mb-2"
       >Inserir Novo</b-button
     >
     <!-- Modal de Cadastro e Edição -->
     <b-modal
       id="modalCadastro"
-      title="Cadastrar Novo Feriado"
+      :title="`${tituloModal} FERIADO`"
       hide-footer
-      :clickToClose="false"
-      @before-close="beforeClose"
-      @before-open="beforeOpen"
-      @closed="closeds"
-      @opened="opened"
+      @hidden="limparDados"
     >
       <b-container fluid>
         <b-form @submit.prevent="salvar">
@@ -100,7 +93,7 @@ export default {
   name: "Feriados",
   data() {
     return {
-      name: "",
+      tituloModal: "Cadastrar",
       fields: [
         { key: "feriadoId", label: "Código", sortable: true },
         { key: "nome", label: "Descrição", sortable: true },
@@ -127,36 +120,53 @@ export default {
     };
   },
   methods: {
-    opened(event) {
-      console.log(event);
-    },
-    beforeOpen(event) {
-      console.log(event);
-    },
-    beforeClose(event) {
-      this.limparDados();
-      console.log(event);
-    },
-    closeds(event) {
-      console.log(event);
+    abrirModal() {
+      this.tituloModal = "CADASTRAR";
+      this.$bvModal.show("modalCadastro");
     },
     salvar() {
+      const feriadoId = this.feriado.feriadoId;
+      console.log(feriadoId);
       if (this.diaJaCadastrado() > 0) return;
       if (this.feriado.dia == null) return;
 
-      console.log(this.feriado.dia);
+      if (feriadoId == null) {
+        this.feriados.push({
+          feriadoId: this.feriados.length + 1,
+          nome: this.feriado.nome,
+          dia: this.converterData(this.feriado.dia),
+        });
+      } else {
+        const feriado = this.feriados.filter((f) => f.feriadoId == feriadoId);
+        console.log(feriado);
+        //logica para atualizar o feriado
+      }
 
-      this.feriados.push({
-        feriadoId: this.feriados.length + 1,
-        nome: this.feriado.nome,
-        dia: this.converterData(this.feriado.dia),
-      });
       this.limparDados();
+      this.$bvModal.hide("modalCadastro");
     },
     excluir(item, index) {
-      return this.feriados.splice(index, 1);
+      const feriado = this.feriados[index].nome;
+      this.$bvModal
+        .msgBoxConfirm(feriado, {
+          title: "Deseja Excluir Esse Registro?",
+          size: "sm",
+          buttonSize: "sm",
+          okVariant: "danger",
+          okTitle: "Sim",
+          cancelTitle: "Não",
+          hideHeaderClose: false,
+          centered: true,
+        })
+        .then((value) => {
+          if (value) this.feriados.splice(index, 1);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
     editar(item, index) {
+      this.tituloModal = "ALTERAR";
       this.feriado = this.feriados[index];
       this.$bvModal.show("modalCadastro");
     },
