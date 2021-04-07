@@ -3,6 +3,7 @@ import App from './App.vue'
 import './plugins/bootstrap-vue'
 import router from './router'
 import './plugins/vue-js-modal'
+import './plugins/vuelidade'
 
 Vue.config.productionTip = false
 

@@ -6,6 +6,7 @@ const cards = [
     filhos: [
       {
         titulo: "VENDEDORES",
+        nome:'vendedor',
         nomeImg: "IconVendedores.svg",
         pai: false,
         filhos: false,
@@ -13,6 +14,7 @@ const cards = [
       },
       {
         titulo: "FERIADOS",
+        nome:'feriado',
         nomeImg: "IconFeriados.svg",
         pai: false,
         filhos: false,

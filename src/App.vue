@@ -6,16 +6,12 @@
 
     <div class="body">
       <MenuPrincipal @tituloSelecionado="titulo = $event" />
-
-      <button @click="showModalFeriados">modal</button>
-
-      <modal name="modalFeriados">
-        <Feriados />
-      </modal>
     </div>
+
     <div class="footer">
       <Footer />
     </div>
+
   </div>
 </template>
 
@@ -23,11 +19,10 @@
 import Header from "./views/Header";
 import MenuPrincipal from "./components/MenuPrincipal";
 import Footer from "./views/Footer";
-import Feriados from "./components/cadastros/Feriados";
 
 export default {
   name: "App",
-  components: { Header, MenuPrincipal, Feriados, Footer },
+  components: { Header, Footer, MenuPrincipal },
   data() {
     return {
       titulo: "PRINCIPAL",
@@ -39,33 +34,7 @@ export default {
     },
   },
   methods: {
-    showModalFeriados() {
-      this.$modal.show(Feriados, {
-        buttons: [
-          {
-            title: "Cancel",
-            handler: () => {
-              this.$modal.hide("dialog");
-            },
-          },
-          {
-            title: "Like",
-            handler: () => {
-              alert("Like action");
-            },
-          },
-          {
-            title: "Repost",
-            handler: () => {
-              alert("Repost action");
-            },
-          },
-        ],
-      });
-    },
-    hideModalFeriados() {
-      this.$modal.hide("modalFeriados");
-    },
+   
   },
 };
 </script>

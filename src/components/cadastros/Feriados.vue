@@ -4,9 +4,7 @@
       <h2>FERIADOS</h2>
     </div>
     <hr />
-    <b-button variant="primary" @click="abrirModal" class="mb-2"
-      >Inserir Novo</b-button
-    >
+    <b-button variant="primary" @click="abrirModal" class="mb-2">Inserir Novo</b-button>
     <!-- Modal de Cadastro e Edição -->
     <b-modal
       id="modalCadastro"
@@ -14,23 +12,19 @@
       hide-footer
       @hidden="limparDados"
     >
-      <b-container fluid>
-        <b-form @submit.prevent="salvar">
+      <b-container fluid>        
+        <b-form >
           <b-form-group
             id="label1"
             label="Descrição"
-            label-for="campo1"
-            :invalid-feedback="invalidFeedback"
-            :state="state"
-          >
+            label-for="campo1">
             <b-form-input
               id="campo1"
-              v-model="feriado.nome"
-              trim
+              v-model.trim="$v.feriado.nome.$model"
               required
-              :invalid-feedback="invalidFeedback"
-              :state="state"
             ></b-form-input>
+             <div class="error" v-if="!$v.feriado.nome.required">Descrição Obrigatório.</div>
+             <div class="error" v-if="!$v.feriado.nome.minLength">Mínimo {{ $v.feriado.nome.$params.minLength.min }} caracteres.</div>
           </b-form-group>
 
           <b-form-group label="Dia do Feriado" label-for="inputFeriado">
@@ -41,12 +35,12 @@
               today-button
               reset-button
               placeholder="Selecione Uma Data"
-              v-model="feriado.dia"
+              v-model="$v.feriado.dia.$model"
             ></b-form-datepicker>
+             <div class="error" v-if="!$v.feriado.dia.required">Dia Obrigatório.</div>
+
           </b-form-group>
-          <b-button type="submit" variant="success" class="mr-2"
-            >Salvar</b-button
-          >
+          <b-button type="submit" variant="success" class="mr-2" @click.prevent="salvar">Salvar</b-button>
           <b-button class="mr-2" @click="fecharModal">Fechar</b-button>
         </b-form>
       </b-container>
@@ -88,6 +82,7 @@
 
 <script>
 import moment from "moment";
+import {required, minLength} from 'vuelidate/lib/validators'
 
 export default {
   name: "Feriados",
@@ -119,14 +114,25 @@ export default {
       ],
     };
   },
+  validations: {
+    feriado: {
+     nome:{
+       required,
+       minLength: minLength(3)
+     },
+     dia:{
+       required
+     }
+    }
+  },
   methods: {
     abrirModal() {
       this.tituloModal = "CADASTRAR";
       this.$bvModal.show("modalCadastro");
     },
     salvar() {
+   
       const feriadoId = this.feriado.feriadoId;
-      console.log(feriadoId);
       if (this.diaJaCadastrado() > 0) return;
       if (this.feriado.dia == null) return;
 
@@ -188,17 +194,7 @@ export default {
       this.$bvModal.hide("modalCadastro");
     },
   },
-  computed: {
-    state() {
-      return this.feriado.nome.length >= 4;
-    },
-    invalidFeedback() {
-      if (this.feriado.nome.length > 0) {
-        return "Descrição menor que 4 caracteres.";
-      }
-      return "Campo Descrição Obrigatório!";
-    },
-  },
+ 
 };
 </script>
 
@@ -210,5 +206,8 @@ export default {
 .feriados {
   text-align: center;
   margin: 10px;
+}
+.error{
+  color: red;
 }
 </style>
