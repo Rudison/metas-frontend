@@ -1,264 +1,192 @@
 <template>
-  <div class="vendedores">
-    <div class="header">
-      <h2>VENDEDORES</h2>
+  <div>
+    <div class="btnback ml-2">
+      <b-button-group>
+        <b-button
+          size="lg"
+          variant="success"
+          v-if="inicio"
+          v-b-tooltip.hover
+          title="Inicio"
+          @click="voltarInicio"
+        >
+          <b-icon icon="house-door" aria-label="Inicio"></b-icon>
+        </b-button>
+
+        <b-button
+          size="lg"
+          variant="primary"
+          v-b-modal.lancamento
+          v-b-tooltip.hover
+          title="Inserir Lançamento"
+        >
+          <b-icon icon="plus-circle"></b-icon>
+        </b-button>
+        <b-button
+          size="lg"
+          variant="outline-info"
+          v-b-modal.modalAno
+          v-b-tooltip.hover
+          title="Filtrar Por Ano"
+        >
+          <b-icon icon="search"></b-icon>
+        </b-button>
+      </b-button-group>
     </div>
-    <hr />
-    <b-button variant="primary" @click="abrirModal" class="mb-2">Inserir Novo</b-button
-    >
-    <!-- Modal de Cadastro e Edição -->
-    <b-modal
-      id="modalCadastro"
-      :title="`${tituloModal} VENDEDOR`"
-      hide-footer
-      @hidden="limparDados"
-    >
-      <b-container fluid>
-        <p  v-if="submitStatus === 'ERROR'" class="error">* Existem Campos Obrigatórios</p>
-        <b-form @submit.prevent="salvar">
 
-           <b-form-group id="label1" label="Nome Vendedor" label-for="campo1">
-           <b-form-input id="campo1" v-model.trim="$v.vendedor.nome.$model"></b-form-input>
-
-           <div class="error" v-if="!$v.vendedor.nome.required">Descrição Obrigatório.</div>
-           <div class="error" v-if="!$v.vendedor.nome.minLength">Mínimo {{ $v.vendedor.nome.$params.minLength.min }} caracteres.</div>
+    <b-modal id="modalAno" size="sm" title="Ano do Lançamento" hide-footer>
+      <b-container>
+        <b-form>
+          <b-form-group id="label1" label="Ano" label-for="campo1">
+            <b-form-input id="campo1" v-model.trim="ano"></b-form-input>
           </b-form-group>
 
-          <b-form-group label="Empresa" label-for="inputEmpresa">
-             <b-form-select
-              id="campo2"
-              v-model="empresaSelecionada"
-              :options="$v.empresas.$model"
-            ></b-form-select>
-            <div class="error" v-if="!$v.empresaSelecionada.required">Empresa é Obrigatório.</div>
-          </b-form-group>
-
-         <b-form-group
-            id="label3"
-            label="Cód.Vendedor Blue"
-            label-for="campo3">
-            <b-form-input
-              id="campo3"
-              v-model="$v.vendedor.codVendedor.$model"
-            ></b-form-input>
-            <div class="error" v-if="!$v.vendedor.codVendedor.required">Cód.Vendedor Blue Obrigatório.</div>
-             <div class="error" v-if="!$v.vendedor.codVendedor.minLength">Mínimo {{ $v.vendedor.codVendedor.$params.minLength.min }} caracteres.</div>
-             <div class="error" v-if="!$v.vendedor.codVendedor.maxLength">Máximo {{ $v.vendedor.codVendedor.$params.maxLength.max }} caracteres.</div>
-          </b-form-group>
-
-           <b-form-group
-            id="label4"
-            label="Outros"
-            label-for="campo4">
-            <b-form-checkbox id="campo4" v-model="vendedor.outros">
-              {{ vendedor.outros ? 'Sim' : 'Não'}}
-            </b-form-checkbox>
-          </b-form-group>
-
-           <b-form-group
-            id="label5"
-            label="Férias"
-            label-for="campo5">
-            <b-form-checkbox id="campo5" v-model="vendedor.ferias">
-              {{ vendedor.ferias ? 'Sim' : 'Não'}}
-            </b-form-checkbox>
-          </b-form-group>
-
-           <b-form-group
-            id="label6"
-            label="Ativo"
-            label-for="campo6">
-            <b-form-checkbox id="campo6" v-model="vendedor.ativo" >
-              {{ vendedor.ativo ? 'Sim' : 'Não'}}
-            </b-form-checkbox>
-          </b-form-group>
-
-          <b-button type="submit" variant="success" class="mr-2">Salvar</b-button>
+          <b-button
+            type="submit"
+            variant="success"
+            class="mr-2"
+            @click.prevent="listar"
+            >Filtrar</b-button
+          >
           <b-button class="mr-2" @click="fecharModal">Fechar</b-button>
         </b-form>
       </b-container>
     </b-modal>
 
-    <div class="tabela">
-      <b-table
-        responsive="sm"
-        striped
-        hover
-        bordered
-        small
-        head-variant="dark"
-        table-variant=""
-        :items="vendedores"
-        :fields="fields"
+    <div class="menus">
+      <b-card
+        class="ml-3"
+        style="background-color: #4caf50; max-width: 20rem"
+        v-for="lancamento in lancamentos"
+        :key="lancamento.id"
+        no-body
+        @click.stop="cardSelecionado(lancamento)"
       >
-        <template #cell(outros)="row">
-          <b-form-checkbox v-model="row.item.outros" disabled>            
-            {{ row.item.outros ? "Sim" : "Não" }}
-          </b-form-checkbox>
+        <template #header>
+          <h4 class="mb-0 tituloMes">{{ lancamento.Mes }}</h4>
         </template>
 
-        <template #cell(ferias)="row">
-          <b-form-checkbox v-model="row.item.ferias" disabled>
-            {{ row.item.ferias ? "Sim" : "Não" }}
-          </b-form-checkbox>
-        </template>
+        <b-list-group flush>
+          <b-list-group-item>
+            <div class="titulosValores">Valor Mensal</div>
+            {{ lancamento.valorMetaMensal }}
+            <div class="titulosValores">Valor Realizado</div>
+            {{ lancamento.valorMetaRealizadoMensal }}
+          </b-list-group-item>
 
-        <template #cell(ativo)="row">
-          <b-form-checkbox disabled 
-            v-model="row.item.ativo">
-            {{ row.item.ativo  ? "Sim" : "Não" }}
-          </b-form-checkbox>
-        </template>
+          <b-list-group-item v-if="info">
+            <div class="titulosValores">
+              Semanas no Mês : {{ lancamento.semanasNoMes }}
+            </div>
+            <div class="titulosValores">
+              Dias Uteis no Mês : {{ lancamento.diasUteisMes }}
+            </div>
+          </b-list-group-item>
+        </b-list-group>
 
-        <template #cell(actions)="row">
-          <b-button
+        <b-card-footer class="footerCard">
+          <b-icon
             class="mr-2"
-            size="sm"
-            @click="editar(row.item, row.index, $event.target)"
-            variant="warning"
-          >
-            <b-icon icon="pencil" aria-hidden="true">Editar</b-icon>
-          </b-button>
+            :variant="lancamento.percentual >= 100 ? 'light' : 'danger'"
+            :icon="
+              lancamento.percentual >= 100
+                ? 'arrow-up-circle'
+                : 'arrow-down-circle'
+            "
+          ></b-icon>
+          {{ lancamento.percentual }}%
           <b-button
+            variant="outline-light"
+            class="ml-2"
             size="sm"
-            @click="excluir(row.item, row.index, $event.target)"
-            variant="danger"
+            @click.prevent.stop="info = !info"
+            >Info</b-button
           >
-            <b-icon icon="trash" aria-hidden="true">Excluir</b-icon>
-          </b-button>
-        </template>
-      </b-table>
+        </b-card-footer>
+      </b-card>
+
+      <!-- <b-card
+        v-for="lancamento in lancamentos"
+        :key="lancamento.id"
+        style="background-color: #4caf50"
+        text-variant="white"
+        class="text-center ml-4 mt-2 grow"
+        :header="lancamento.mes"
+      >
+        {{ lancamento.id }}
+      </b-card> -->
     </div>
   </div>
 </template>
 
 <script>
-import {required, minLength, maxLength} from 'vuelidate/lib/validators'
+import axios from "axios";
+import { baseApiUrl } from "@/global";
 
 export default {
-  name: "Vendedores",
+  name: "Lancamentos",
+  mounted() {
+    this.listar();
+  },
   data() {
     return {
-      tituloModal: "Lancamentos",
-      submitStatus: null,
-      empresaSelecionada: null,
-      empresas:[
-        { value: null, text: 'Selecione uma Empresa' },
-        { value: 1, text: 'Castelo' },
-        { value: 2, text: 'Stoky' }
-      ],
-      vendedor: {
-        empresaId: 1,
-        codVendedor: "",
-        nome: "",
-        outros: false,
-        ferias: false,
-        ativo: true,
-      },
+      ano: new Date().getFullYear(),
+      inicio: true,
+      lancamentos: [],
+      info: false,
     };
   },
-  validations: {
-    empresas:{
-      required
-    },
-    empresaSelecionada:{
-      required
-    },
-    vendedor: {
-      empresaId:{
-        required
-      },
-      codVendedor:{
-        required,
-        minLength: minLength(5),
-        maxLength: maxLength(5)
-      },
-      nome:{
-        required,
-        minLength: minLength(3)
-      }
-    }
-  },
   methods: {
-    salvar() {
-
-      if(this.$v.$invalid) {
-        this.submitStatus = 'ERROR'
-        return;
-      }
-
-      const id = this.vendedor.id;
-
-      if (id == null) {
-        this.vendedores.push({
-          id: this.vendedores.length + 1,
-          empresaId: this.empresaSelecionada,
-          nome: this.vendedor.nome,
-          codVendedor: this.vendedor.codVendedor,
-          outros: this.vendedor.outros,
-          ferias: this.vendedor.ferias,
-          ativo: this.vendedor.ativo
-        });
-      } else {
-        const vendedor = this.vendedores.filter(
-          (v) => v.id == id
-        );
-        console.log(vendedor);
-      }
-
-      this.limparDados();
-      this.$bvModal.hide("modalCadastro");
+    voltarInicio() {
+      this.$router.push("/");
     },
-    excluir(item, index) {
-      const vendedor = this.vendedores[index].nome;
-      this.$bvModal
-        .msgBoxConfirm(vendedor, {
-          title: "Deseja Excluir Esse Registro?",
-          size: "sm",
-          buttonSize: "sm",
-          okVariant: "danger",
-          okTitle: "Sim",
-          cancelTitle: "Não",
-          hideHeaderClose: false,
-          centered: true,
+    listar() {
+      axios
+        .get(`${baseApiUrl}/metas/porAno/${this.ano}`)
+        .then((res) => {
+          this.lancamentos = res.data;
         })
-        .then((value) => {
-          if (value) this.vendedores.splice(index, 1);
-        })
-        .catch((err) => {
-          console.log(err);
+        .catch((error) => {
+          console.log(error);
         });
+
+      this.fecharModal();
     },
-    editar(item, index) {
-      this.tituloModal = "ALTERAR";
-      this.vendedor = this.vendedores[index];
-      this.$bvModal.show("modalCadastro");
-    },
-    limparDados() {
-      this.vendedor = {
-        empresaId: 1,
-        codVendedor: "",
-        nome: "",
-        outros: false,
-        ferias: false,
-        ativo: true,
-      };
+    cardSelecionado(lancamento) {
+      this.$router.push("/metas");
     },
     fecharModal() {
-      this.limparDados();
-      this.$bvModal.hide("modalCadastro");
+      this.$bvModal.hide("modalAno");
     },
   },
 };
 </script>
 
 <style>
-.header {
-  height: 80px;
-  background-color: #4caf50;
+.tituloMes {
+  font-size: 1.3rem;
+  color: #fff;
+  font-weight: bold;
 }
-.vendedores {
-  text-align: center;
-  margin: 10px;
+.titulosValores {
+  color: #4caf50;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+.btnback {
+  float: left;
+}
+.menus {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.card {
+  cursor: pointer;
+}
+.footerCard {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: bold;
 }
 </style>

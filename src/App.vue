@@ -5,9 +5,7 @@
     </div>
 
     <div class="body">
-      <MenuPrincipal 
-      @tituloSelecionado="titulo = $event"  
-      @iconSelecionado="icon = $event" />
+      <router-view/>    
     </div>
 
     <div class="footer">
@@ -19,12 +17,11 @@
 
 <script>
 import Header from "./views/Header";
-import MenuPrincipal from "./components/MenuPrincipal";
 import Footer from "./views/Footer";
 
 export default {
   name: "App",
-  components: { Header, Footer, MenuPrincipal },
+  components: { Header, Footer },
   data() {
     return {
       titulo: "PRINCIPAL",

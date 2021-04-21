@@ -9,16 +9,7 @@
             v-b-tooltip.hover title="Inicio"
             @click="voltarInicio">
             <b-icon icon="house-door" aria-label="Inicio"></b-icon>
-          </b-button>
-
-          <b-button
-            size="lg"
-            variant="primary"
-            v-if="!inicio && lancamento"
-            v-b-modal.lancamento
-            v-b-tooltip.hover title="Inserir Lançamento">
-            <b-icon icon="plus-circle"></b-icon>
-          </b-button>
+          </b-button>         
         </b-button-group>   
     </div>
 
@@ -34,8 +25,8 @@
         <b-card-img
           :src="require('../assets/' + card.nomeImg)"
           width="65"
-          height="65"
-        ></b-card-img>
+          height="65">
+        </b-card-img>        
       </b-card>
     </div>
 
@@ -44,10 +35,6 @@
       </component>
     </modal>
 
-    <b-modal id="lancamento" size="lg" title="CADASTRAR LANÇAMENTO">
-     <Lancamentos/>
-    </b-modal>
-   
   </div>
 </template>
 
@@ -55,10 +42,9 @@
 import cards from "../menus";
 import Feriados from "./cadastros/Feriados";
 import Vendedores from "./cadastros/Vendedores";
-import Lancamentos from './lancamentos/Lancamentos.vue';
 
 export default {
-  components:{ Feriados, Vendedores,  Lancamentos },
+  components:{ Feriados, Vendedores },
   data() {
     return {
       cards,
@@ -84,7 +70,10 @@ export default {
         this.cards = card.filhos
 
       if(card.possuiRota)
+      {
+        this.$router.push(card.rota)
         this.lancamento = true
+      }
     
       this.componente = card.componente
       this.showModal(card.popup)

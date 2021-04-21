@@ -7,55 +7,63 @@
 
     <b-container fluid>
       <b-row>
-         <b-col lg="6" class="my-1">
+        <b-col lg="6" class="my-1">
           <b-form-group
             label="Pesquisar"
             label-for="filter-input"
             label-cols-sm="3"
             label-align-sm="right"
             label-size="sm"
-            class="mb-0">
+            class="mb-0"
+          >
             <b-input-group size="sm">
               <b-form-input
                 id="filter-input"
                 v-model="filter"
                 type="search"
-                placeholder="filtrar..."></b-form-input>
+                placeholder="filtrar..."
+              ></b-form-input>
 
               <b-input-group-append>
-                <b-button :disabled="!filter" @click="filter = ''">Limpar</b-button>
+                <b-button :disabled="!filter" @click="filter = ''"
+                  >Limpar</b-button
+                >
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
         </b-col>
         <b-col lg="6" class="my-1">
-          <b-button variant="primary" size="sm" @click="abrirModal" class="mb-2">Inserir Novo</b-button>     
+          <b-button variant="primary" size="sm" @click="abrirModal" class="mb-2"
+            >Inserir Novo</b-button
+          >
         </b-col>
       </b-row>
     </b-container>
 
     <!-- Modal de Cadastro e Edição -->
-    <b-modal id="msgModal"></b-modal>   
+    <b-modal id="msgModal"></b-modal>
 
     <b-modal
       id="modalCadastro"
       :title="`${tituloModal} FERIADO`"
       hide-footer
-      @hidden="limparDados">    
-
-      <b-container fluid>        
-        <b-form >
-          <b-form-group
-            id="label1"
-            label="Descrição"
-            label-for="campo1">
+      @hidden="limparDados"
+    >
+      <b-container fluid>
+        <b-form>
+          <b-form-group id="label1" label="Descrição" label-for="campo1">
             <b-form-input
               id="campo1"
               v-model.trim="$v.feriado.descricao.$model"
               required
             ></b-form-input>
-             <div class="error" v-if="!$v.feriado.descricao.required">Descrição Obrigatório.</div>
-             <div class="error" v-if="!$v.feriado.descricao.minLength">Mínimo {{ $v.feriado.descricao.$params.minLength.min }} caracteres.</div>
+            <div class="error" v-if="!$v.feriado.descricao.required">
+              Descrição Obrigatório.
+            </div>
+            <div class="error" v-if="!$v.feriado.descricao.minLength">
+              Mínimo
+              {{ $v.feriado.descricao.$params.minLength.min }} caracteres.
+            </div>
           </b-form-group>
 
           <b-form-group label="Dia do Feriado" label-for="inputFeriado">
@@ -68,10 +76,17 @@
               placeholder="Selecione Uma Data"
               v-model="$v.feriado.dia.$model"
             ></b-form-datepicker>
-             <div class="error" v-if="!$v.feriado.dia.required">Dia Obrigatório.</div>
-
+            <div class="error" v-if="!$v.feriado.dia.required">
+              Dia Obrigatório.
+            </div>
           </b-form-group>
-          <b-button type="submit" variant="success" class="mr-2" @click.prevent="salvar">Salvar</b-button>
+          <b-button
+            type="submit"
+            variant="success"
+            class="mr-2"
+            @click.prevent="salvar"
+            >Salvar</b-button
+          >
           <b-button class="mr-2" @click="fecharModal">Fechar</b-button>
         </b-form>
       </b-container>
@@ -93,18 +108,26 @@
         :per-page="perPage"
         :filter="filter"
         :current-page="currentPage"
-        @filtered="onFiltered">
-
+        @filtered="onFiltered"
+      >
         <template #empty="scope">
-          <p> <strong> {{ scope.emptyText =  'Sem registros cadastrados' }} </strong></p>
+          <p>
+            <strong>
+              {{ (scope.emptyText = "Sem registros cadastrados") }}
+            </strong>
+          </p>
         </template>
 
         <template #emptyfiltered="scope">
-          <p> <strong> {{ scope.emptyFilteredText = 'Nenhum registro encontrado!' }} </strong> </p>
+          <p>
+            <strong>
+              {{ (scope.emptyFilteredText = "Nenhum registro encontrado!") }}
+            </strong>
+          </p>
         </template>
 
         <template #cell(dia)="row">
-            {{  converterData(row.item.dia, true) }}
+          {{ converterData(row.item.dia, true) }}
         </template>
 
         <template #cell(actions)="row">
@@ -127,54 +150,53 @@
       </b-table>
     </div>
 
-     <b-container fluid>
+    <b-container fluid>
       <b-row>
         <b-col sm="4" md="4" class="my-1">
-        <b-form-group
-          label="Por página"
-          label-for="per-page-select"
-          label-cols-sm="6"
-          label-cols-md="4"
-          label-cols-lg="3"
-          label-align-sm="right"
-          label-size="sm"
-          class="mb-0">
+          <b-form-group
+            label="Por página"
+            label-for="per-page-select"
+            label-cols-sm="6"
+            label-cols-md="4"
+            label-cols-lg="3"
+            label-align-sm="right"
+            label-size="sm"
+            class="mb-0"
+          >
+            <b-form-select
+              id="per-page-select"
+              v-model="perPage"
+              :options="pageOptions"
+              size="sm"
+            ></b-form-select>
+          </b-form-group>
+        </b-col>
 
-          <b-form-select
-            id="per-page-select"
-            v-model="perPage"
-            :options="pageOptions"
+        <b-col sm="7" md="6" class="my-1">
+          <b-pagination
+            v-model="currentPage"
+            :total-rows="totalRows"
+            :per-page="perPage"
+            align="fill"
             size="sm"
-          ></b-form-select>
-        </b-form-group>
-      </b-col>
-
-      <b-col sm="7" md="6" class="my-1">
-        <b-pagination
-          v-model="currentPage"
-          :total-rows="totalRows"
-          :per-page="perPage"
-          align="fill"
-          size="sm"
-          class="my-0"
-        ></b-pagination>
-      </b-col>
+            class="my-0"
+          ></b-pagination>
+        </b-col>
       </b-row>
     </b-container>
-
   </div>
 </template>
 
 <script>
 import moment from "moment";
-import {required, minLength} from 'vuelidate/lib/validators'
-import axios from 'axios'
-import { baseApiUrl } from '@/global'
+import { required, minLength } from "vuelidate/lib/validators";
+import axios from "axios";
+import { baseApiUrl } from "@/global";
 
 export default {
   name: "Feriados",
   mounted() {
-    this.listar()
+    this.listar();
   },
   data() {
     return {
@@ -193,41 +215,41 @@ export default {
       diaAnterior: null,
       totalRows: 1,
       currentPage: 1,
-      perPage:10,
+      perPage: 10,
       filter: null,
       filterOn: [],
-      pageOptions: [10,15,20, { value: 100, text: 'Mostrar Tudo'}]
+      pageOptions: [10, 15, 20, { value: 100, text: "Mostrar Tudo" }],
     };
   },
   validations: {
     feriado: {
-     descricao:{
-       required,
-       minLength: minLength(3)
-     },
-     dia:{
-       required
-     }
-    }
+      descricao: {
+        required,
+        minLength: minLength(3),
+      },
+      dia: {
+        required,
+      },
+    },
   },
   methods: {
-    onFiltered(filteredItems){
-      this.totalRows = filteredItems.length
-      this.currentPage = 1
+    onFiltered(filteredItems) {
+      this.totalRows = filteredItems.length;
+      this.currentPage = 1;
     },
     abrirModal() {
       this.tituloModal = "CADASTRAR";
       this.$bvModal.show("modalCadastro");
     },
-    listar(){
-      axios.get(`${baseApiUrl}/feriados`).then(res => {
-        this.feriados = res.data
-        this.totalRows = res.data.length
-      })
+    listar() {
+      axios.get(`${baseApiUrl}/feriados`).then((res) => {
+        this.feriados = res.data;
+        this.totalRows = res.data.length;
+      });
     },
     salvar() {
-      if(this.$v.$invalid) {
-        this.submitStatus = 'ERROR'
+      if (this.$v.$invalid) {
+        this.submitStatus = "ERROR";
         return;
       }
 
@@ -236,32 +258,41 @@ export default {
       if (this.feriado.dia == null) return;
 
       if (id == null) {
-        axios.post(`${baseApiUrl}/feriados`, this.feriado).then(res => {
-          this.listar()
-          return res
-        })
-        .catch(error => {
-          this.$bvModal.msgBoxOk(`Erro incluir Feriado: ${this.feriado.descricao} ${error}`, {
-            title: 'Atenção'
+        axios
+          .post(`${baseApiUrl}/feriados`, this.feriado)
+          .then((res) => {
+            this.listar();
+            return res;
           })
-          return error
-        })
+          .catch((error) => {
+            this.$bvModal.msgBoxOk(
+              `Erro incluir Feriado: ${this.feriado.descricao} ${error}`,
+              {
+                title: "Atenção",
+              }
+            );
+            return error;
+          });
       } else {
-      
-       const dia = this.converterData(`${this.feriado.dia} 00:00`, false)
-       
-       const feriado = {
+        const dia = this.converterData(`${this.feriado.dia} 00:00`, false);
+
+        const feriado = {
           descricao: this.feriado.descricao,
-          dia
-        }
-         axios.put(`${baseApiUrl}/feriados/${id}`, feriado).then(res => {
-           this.listar()
-           return res
-        }).catch(error => {
-          const erro = error.response.data.message
-          this.$bvModal.msgBoxOk(`Erro alterar Feriado: ${this.feriado.descricao} ${erro}`)
-          this.listar()
-        })
+          dia,
+        };
+        axios
+          .put(`${baseApiUrl}/feriados/${id}`, feriado)
+          .then((res) => {
+            this.listar();
+            return res;
+          })
+          .catch((error) => {
+            const erro = error.response.data.message;
+            this.$bvModal.msgBoxOk(
+              `Erro alterar Feriado: ${this.feriado.descricao} ${erro}`
+            );
+            this.listar();
+          });
       }
 
       this.limparDados();
@@ -269,7 +300,7 @@ export default {
     },
     excluir(item, index) {
       const feriado = this.feriados[index].descricao;
-      
+
       this.$bvModal
         .msgBoxConfirm(feriado, {
           title: "Deseja Excluir Esse Registro?",
@@ -282,22 +313,24 @@ export default {
           centered: true,
         })
         .then((value) => {
-          if (value) {            
-            axios.delete(`${baseApiUrl}/feriados/${item.id}`).then(res => {
-              this.listar()
-              return res
-            })
+          if (value) {
+            axios.delete(`${baseApiUrl}/feriados/${item.id}`).then((res) => {
+              this.listar();
+              return res;
+            });
           }
         })
         .catch((err) => {
-          this.$bvModal.msgBoxOk(`Erro excluir Feriado: ${this.feriado.nome} ${err}`)
+          this.$bvModal.msgBoxOk(
+            `Erro excluir Feriado: ${this.feriado.nome} ${err}`
+          );
         });
     },
     editar(item, index) {
-      this.diaAnterior = this.converterData(`${this.feriado.dia} 00:00`, false)
+      this.diaAnterior = this.converterData(`${this.feriado.dia} 00:00`, false);
       this.tituloModal = "ALTERAR";
-      this.feriado = item
-      
+      this.feriado = item;
+
       this.$bvModal.show("modalCadastro");
     },
     limparDados() {
@@ -309,25 +342,19 @@ export default {
     diaJaCadastrado() {
       return this.feriados.filter((d) => d.dia === this.feriado.dia).length;
     },
-    converterData(date, exibirGrid) 
-    {
-      if(exibirGrid)
-        return moment(date).format("DD-MM-YYYY");
-      else
-        return moment(date).format("YYYY-MM-DD HH:mm");
+    converterData(date, exibirGrid) {
+      if (exibirGrid) return moment(date).format("DD-MM-YYYY");
+      else return moment(date).format("YYYY-MM-DD HH:mm");
     },
     fecharModal() {
       this.limparDados();
       this.$bvModal.hide("modalCadastro");
     },
-   
   },
- 
 };
 </script>
 
 <style>
-
 .header {
   height: 80px;
   background-color: #4caf50;
@@ -336,7 +363,7 @@ export default {
   text-align: center;
   margin: 10px;
 }
-.error{
+.error {
   color: red;
 }
 </style>
