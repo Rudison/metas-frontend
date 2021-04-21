@@ -4,14 +4,45 @@
       <h2>FERIADOS</h2>
     </div>
     <hr />
-    <b-button variant="primary" @click="abrirModal" class="mb-2">Inserir Novo</b-button>
+
+    <b-container fluid>
+      <b-row>
+         <b-col lg="6" class="my-1">
+          <b-form-group
+            label="Pesquisar"
+            label-for="filter-input"
+            label-cols-sm="3"
+            label-align-sm="right"
+            label-size="sm"
+            class="mb-0">
+            <b-input-group size="sm">
+              <b-form-input
+                id="filter-input"
+                v-model="filter"
+                type="search"
+                placeholder="filtrar..."></b-form-input>
+
+              <b-input-group-append>
+                <b-button :disabled="!filter" @click="filter = ''">Limpar</b-button>
+              </b-input-group-append>
+            </b-input-group>
+          </b-form-group>
+        </b-col>
+        <b-col lg="6" class="my-1">
+          <b-button variant="primary" size="sm" @click="abrirModal" class="mb-2">Inserir Novo</b-button>     
+        </b-col>
+      </b-row>
+    </b-container>
+
     <!-- Modal de Cadastro e Edição -->
+    <b-modal id="msgModal"></b-modal>   
+
     <b-modal
       id="modalCadastro"
       :title="`${tituloModal} FERIADO`"
       hide-footer
-      @hidden="limparDados"
-    >
+      @hidden="limparDados">    
+
       <b-container fluid>        
         <b-form >
           <b-form-group
@@ -20,18 +51,18 @@
             label-for="campo1">
             <b-form-input
               id="campo1"
-              v-model.trim="$v.feriado.nome.$model"
+              v-model.trim="$v.feriado.descricao.$model"
               required
             ></b-form-input>
-             <div class="error" v-if="!$v.feriado.nome.required">Descrição Obrigatório.</div>
-             <div class="error" v-if="!$v.feriado.nome.minLength">Mínimo {{ $v.feriado.nome.$params.minLength.min }} caracteres.</div>
+             <div class="error" v-if="!$v.feriado.descricao.required">Descrição Obrigatório.</div>
+             <div class="error" v-if="!$v.feriado.descricao.minLength">Mínimo {{ $v.feriado.descricao.$params.minLength.min }} caracteres.</div>
           </b-form-group>
 
           <b-form-group label="Dia do Feriado" label-for="inputFeriado">
             <b-form-datepicker
               id="inputFeriado"
               locale="pt-BR"
-              format="DD-MM-YYYY"
+              format="DD-MM-YYYY HH:MM"
               today-button
               reset-button
               placeholder="Selecione Uma Data"
@@ -49,15 +80,33 @@
     <div class="tabela">
       <b-table
         responsive="sm"
+        sticky-header="500px"
         striped
         hover
         bordered
         small
+        show-empty
         head-variant="dark"
         table-variant=""
         :items="feriados"
         :fields="fields"
-      >
+        :per-page="perPage"
+        :filter="filter"
+        :current-page="currentPage"
+        @filtered="onFiltered">
+
+        <template #empty="scope">
+          <p> <strong> {{ scope.emptyText =  'Sem registros cadastrados' }} </strong></p>
+        </template>
+
+        <template #emptyfiltered="scope">
+          <p> <strong> {{ scope.emptyFilteredText = 'Nenhum registro encontrado!' }} </strong> </p>
+        </template>
+
+        <template #cell(dia)="row">
+            {{  converterData(row.item.dia, true) }}
+        </template>
+
         <template #cell(actions)="row">
           <b-button
             class="mr-2"
@@ -77,46 +126,82 @@
         </template>
       </b-table>
     </div>
+
+     <b-container fluid>
+      <b-row>
+        <b-col sm="4" md="4" class="my-1">
+        <b-form-group
+          label="Por página"
+          label-for="per-page-select"
+          label-cols-sm="6"
+          label-cols-md="4"
+          label-cols-lg="3"
+          label-align-sm="right"
+          label-size="sm"
+          class="mb-0">
+
+          <b-form-select
+            id="per-page-select"
+            v-model="perPage"
+            :options="pageOptions"
+            size="sm"
+          ></b-form-select>
+        </b-form-group>
+      </b-col>
+
+      <b-col sm="7" md="6" class="my-1">
+        <b-pagination
+          v-model="currentPage"
+          :total-rows="totalRows"
+          :per-page="perPage"
+          align="fill"
+          size="sm"
+          class="my-0"
+        ></b-pagination>
+      </b-col>
+      </b-row>
+    </b-container>
+
   </div>
 </template>
 
 <script>
 import moment from "moment";
 import {required, minLength} from 'vuelidate/lib/validators'
+import axios from 'axios'
+import { baseApiUrl } from '@/global'
 
 export default {
   name: "Feriados",
+  mounted() {
+    this.listar()
+  },
   data() {
     return {
       tituloModal: "Cadastrar",
       fields: [
-        { key: "feriadoId", label: "Código", sortable: true },
-        { key: "nome", label: "Descrição", sortable: true },
+        { key: "id", label: "Id", sortable: true },
+        { key: "descricao", label: "Descrição", sortable: true },
         { key: "dia", label: "Dia Feriado", sortable: true },
         { key: "actions", label: "Ações" },
       ],
       feriado: {
-        nome: "",
+        descricao: "",
         dia: null,
       },
-      feriados: [
-        { feriadoId: 1, nome: "Sexta Feira Santa", dia: "02-04-2021" },
-        {
-          feriadoId: 2,
-          nome: "Aniversário de Várzea Grande",
-          dia: "15-05-2021",
-        },
-        {
-          feriadoId: 3,
-          nome: "Natal",
-          dia: "25-12-2021",
-        },
-      ],
+      feriados: [],
+      diaAnterior: null,
+      totalRows: 1,
+      currentPage: 1,
+      perPage:10,
+      filter: null,
+      filterOn: [],
+      pageOptions: [10,15,20, { value: 100, text: 'Mostrar Tudo'}]
     };
   },
   validations: {
     feriado: {
-     nome:{
+     descricao:{
        required,
        minLength: minLength(3)
      },
@@ -126,33 +211,65 @@ export default {
     }
   },
   methods: {
+    onFiltered(filteredItems){
+      this.totalRows = filteredItems.length
+      this.currentPage = 1
+    },
     abrirModal() {
       this.tituloModal = "CADASTRAR";
       this.$bvModal.show("modalCadastro");
     },
+    listar(){
+      axios.get(`${baseApiUrl}/feriados`).then(res => {
+        this.feriados = res.data
+        this.totalRows = res.data.length
+      })
+    },
     salvar() {
-   
-      const feriadoId = this.feriado.feriadoId;
-      if (this.diaJaCadastrado() > 0) return;
+      if(this.$v.$invalid) {
+        this.submitStatus = 'ERROR'
+        return;
+      }
+
+      const id = this.feriado.id;
+
       if (this.feriado.dia == null) return;
 
-      if (feriadoId == null) {
-        this.feriados.push({
-          feriadoId: this.feriados.length + 1,
-          nome: this.feriado.nome,
-          dia: this.converterData(this.feriado.dia),
-        });
+      if (id == null) {
+        axios.post(`${baseApiUrl}/feriados`, this.feriado).then(res => {
+          this.listar()
+          return res
+        })
+        .catch(error => {
+          this.$bvModal.msgBoxOk(`Erro incluir Feriado: ${this.feriado.descricao} ${error}`, {
+            title: 'Atenção'
+          })
+          return error
+        })
       } else {
-        const feriado = this.feriados.filter((f) => f.feriadoId == feriadoId);
-        console.log(feriado);
-        //logica para atualizar o feriado
+      
+       const dia = this.converterData(`${this.feriado.dia} 00:00`, false)
+       
+       const feriado = {
+          descricao: this.feriado.descricao,
+          dia
+        }
+         axios.put(`${baseApiUrl}/feriados/${id}`, feriado).then(res => {
+           this.listar()
+           return res
+        }).catch(error => {
+          const erro = error.response.data.message
+          this.$bvModal.msgBoxOk(`Erro alterar Feriado: ${this.feriado.descricao} ${erro}`)
+          this.listar()
+        })
       }
 
       this.limparDados();
       this.$bvModal.hide("modalCadastro");
     },
     excluir(item, index) {
-      const feriado = this.feriados[index].nome;
+      const feriado = this.feriados[index].descricao;
+      
       this.$bvModal
         .msgBoxConfirm(feriado, {
           title: "Deseja Excluir Esse Registro?",
@@ -165,40 +282,52 @@ export default {
           centered: true,
         })
         .then((value) => {
-          if (value) this.feriados.splice(index, 1);
+          if (value) {            
+            axios.delete(`${baseApiUrl}/feriados/${item.id}`).then(res => {
+              this.listar()
+              return res
+            })
+          }
         })
         .catch((err) => {
-          console.log(err);
+          this.$bvModal.msgBoxOk(`Erro excluir Feriado: ${this.feriado.nome} ${err}`)
         });
     },
     editar(item, index) {
+      this.diaAnterior = this.converterData(`${this.feriado.dia} 00:00`, false)
       this.tituloModal = "ALTERAR";
-      this.feriado = this.feriados[index];
+      this.feriado = item
+      
       this.$bvModal.show("modalCadastro");
     },
     limparDados() {
       this.feriado = {
-        nome: "",
+        descricao: "",
         dia: null,
       };
     },
     diaJaCadastrado() {
-      const diaSelecionado = this.converterData(this.feriado.dia);
-      return this.feriados.filter((d) => d.dia === diaSelecionado).length;
+      return this.feriados.filter((d) => d.dia === this.feriado.dia).length;
     },
-    converterData(date) {
-      return moment(date).format("DD-MM-YYYY");
+    converterData(date, exibirGrid) 
+    {
+      if(exibirGrid)
+        return moment(date).format("DD-MM-YYYY");
+      else
+        return moment(date).format("YYYY-MM-DD HH:mm");
     },
     fecharModal() {
       this.limparDados();
       this.$bvModal.hide("modalCadastro");
     },
+   
   },
  
 };
 </script>
 
 <style>
+
 .header {
   height: 80px;
   background-color: #4caf50;

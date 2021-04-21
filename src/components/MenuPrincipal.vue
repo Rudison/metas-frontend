@@ -1,22 +1,35 @@
 <template>
   <div>
-    <b-button
-      v-if="!rotaPrincipal"
-      pill
-      variant="outline-success"
-      class="btnback"
-      @click="voltarInicio">
-      <img src="../assets/iconHome.svg" alt="" />
-    </b-button>
+    <div class="btnback ml-4 mt-2">
+      <b-button-group>
+          <b-button
+            size="lg" 
+            variant="success"
+            v-if="!inicio"
+            v-b-tooltip.hover title="Inicio"
+            @click="voltarInicio">
+            <b-icon icon="house-door" aria-label="Inicio"></b-icon>
+          </b-button>
+
+          <b-button
+            size="lg"
+            variant="primary"
+            v-if="!inicio && lancamento"
+            v-b-modal.lancamento
+            v-b-tooltip.hover title="Inserir Lançamento">
+            <b-icon icon="plus-circle"></b-icon>
+          </b-button>
+        </b-button-group>   
+    </div>
 
     <div class="menus">
       <b-card
-        v-for="card in cards"
-        :key="card.titulo"
-        bg-variant="success"
+        v-for="card in cards"        
+        style="background-color: #4caf50"
         text-variant="white"
+        class="text-center ml-4 mt-2 grow"
+        :key="card.titulo"
         :header="card.titulo"
-        class="text-center ml-3 mt-2 mr-3 grow"
         @click="cardSelecionado(card)">
         <b-card-img
           :src="require('../assets/' + card.nomeImg)"
@@ -26,13 +39,15 @@
       </b-card>
     </div>
 
-    <modal name="modalFeriados">
-      <Feriados />
+    <modal name="modais">
+      <component :is="componente">
+      </component>
     </modal>
 
-    <modal name="modalVendedores">
-      <Vendedores />
-    </modal>
+    <b-modal id="lancamento" size="lg" title="CADASTRAR LANÇAMENTO">
+     <Lancamentos/>
+    </b-modal>
+   
   </div>
 </template>
 
@@ -40,14 +55,17 @@
 import cards from "../menus";
 import Feriados from "./cadastros/Feriados";
 import Vendedores from "./cadastros/Vendedores";
+import Lancamentos from './lancamentos/Lancamentos.vue';
 
 export default {
-  components:{ Feriados, Vendedores },
+  components:{ Feriados, Vendedores,  Lancamentos },
   data() {
     return {
       cards,
       cardsAtuais: [],
-      rotaPrincipal: true,
+      inicio: true,
+      componente: 'Feriados',
+      lancamento:false
     };
   },
   created() {
@@ -55,34 +73,36 @@ export default {
   },
   methods: {
     cardSelecionado(card) {
-      this.$emit("tituloSelecionado", card.titulo);
-      this.rotaPrincipal = false;
+      if(!card.popup)
+        this.$emit("tituloSelecionado", card.titulo, card.icon);
+
+      this.$emit('iconSelecionado', card.icon)
+        
+      this.inicio = false;
       
       if(card.filhos)
         this.cards = card.filhos
-      
-      if(card.popup && card.nome == 'vendedor')
-        this.showModalVendedores()
 
-      if(card.popup && card.nome == 'feriado')
-        this.showModalFeriados()
+      if(card.possuiRota)
+        this.lancamento = true
+    
+      this.componente = card.componente
+      this.showModal(card.popup)
     },
     voltarInicio() {
-      this.rotaPrincipal = true
+      this.inicio = true
+      this.lancamento = false
       this.cards = this.cardsAtuais
+      this.$emit("tituloSelecionado", 'PRINCIPAL');
+      this.$emit('iconSelecionado', 'house-door')
+
     },
-     showModalFeriados() {
-      this.$modal.show(Feriados);
-    },
-    hideModalFeriados() {
-      this.$modal.hide(Feriados);
-    },
-    showModalVendedores() {
-      this.$modal.show(Vendedores);
-    },
-    hideModalVendedores() {
-      this.$modal.hide(Vendedores);
-    },
+    showModal(popup) {
+      const componente = this.componente == 'Vendedores' ? Vendedores : 
+      this.componente == 'Feriados' ? Feriados : '';
+      
+      popup && this.$modal.show(componente)
+    }
   },
 };
 </script>

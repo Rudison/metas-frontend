@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <p>{{ titulo }}</p>
+    <p><b-icon :icon="icon" aria-label="Inicio"></b-icon> {{ titulo }}</p>
   </div>
 </template>
 
@@ -12,6 +12,7 @@ export default {
       required: true,
       default: "PRINCIPAL",
     },
+    icon: String
   },
   data() {
     return {};

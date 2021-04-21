@@ -1,11 +1,13 @@
 <template>
   <div id="app" class="container1 grid-areas">
     <div class="header">
-      <Header :titulo="paramTitulo" />
+      <Header :titulo="titulo" :icon="icon" />
     </div>
 
     <div class="body">
-      <MenuPrincipal @tituloSelecionado="titulo = $event" />
+      <MenuPrincipal 
+      @tituloSelecionado="titulo = $event"  
+      @iconSelecionado="icon = $event" />
     </div>
 
     <div class="footer">
@@ -26,12 +28,8 @@ export default {
   data() {
     return {
       titulo: "PRINCIPAL",
+      icon: 'house-door'
     };
-  },
-  computed: {
-    paramTitulo() {
-      return this.titulo;
-    },
   },
   methods: {
    
