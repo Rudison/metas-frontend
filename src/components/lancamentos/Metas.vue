@@ -26,31 +26,55 @@
         <b-button
           size="xl"
           variant="outline-primary"
+          v-b-tooltip.hover
+          @click="abrirModalVendMes"
+          title="Inserir Meta Mês Vendedor"
+        >
+          <b-icon icon="people-fill"></b-icon>
+        </b-button>
+
+        <b-button
+          size="xl"
+          variant="outline-primary"
           v-b-modal.lancamento
           v-b-tooltip.hover
-          title="Inserir Lançamento"
+          title="Inserir Semana"
         >
-          <b-icon icon="plus-circle"></b-icon>
+          <b-icon icon="calendar2-date"></b-icon>
         </b-button>
       </b-button-group>
     </div>
 
-    <div></div>
+    <b-modal
+      id="modalMetaVendMes"
+      :title="`Metas Vendedores Mensal - ${mesAnoMeta}`"
+      hide-footer
+    >
+      <MetasVendedorMes :metaId="metaId" />
+    </b-modal>
+
     <strong>Código: {{ metaId }}</strong>
   </div>
 </template>
 
 <script>
+import MetasVendedorMes from "./MetasVendedorMes";
+
 export default {
   props: ["metaId"],
+  components: { MetasVendedorMes },
   data() {
     return {
       inicio: true,
+      mesAnoMeta: "JAN/2021",
     };
   },
   methods: {
     voltarInicio(rota) {
       this.$router.push(`${rota}`);
+    },
+    abrirModalVendMes() {
+      this.$bvModal.show("modalMetaVendMes");
     },
   },
 };

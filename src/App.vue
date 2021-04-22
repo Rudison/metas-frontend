@@ -5,13 +5,12 @@
     </div>
 
     <div class="body">
-      <router-view/>    
+      <router-view />
     </div>
 
     <div class="footer">
       <Footer />
     </div>
-
   </div>
 </template>
 
@@ -25,12 +24,10 @@ export default {
   data() {
     return {
       titulo: "PRINCIPAL",
-      icon: 'house-door'
+      icon: "house-door",
     };
   },
-  methods: {
-   
-  },
+  methods: {},
 };
 </script>
 
@@ -50,7 +47,7 @@ body {
 }
 .container1 {
   display: grid;
-  grid-template-rows: 12% auto 10%;
+  grid-template-rows: 11% auto 7%;
   grid-template-columns: 50% 50%;
   width: 100%;
   height: 100vh;

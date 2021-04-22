@@ -1,7 +1,5 @@
 <template>
-  <div class="footer">
-    <p>METAS CASTELO {{ dataAtual }}</p>
-  </div>
+  <div class="footer">METAS CASTELO {{ dataAtual }}</div>
 </template>
 
 <script>
@@ -16,7 +14,6 @@ export default {
 
 <style>
 .footer {
-  height: 60px;
   color: #fff;
   background-color: #4caf50;
 }
