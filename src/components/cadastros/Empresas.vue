@@ -4,7 +4,9 @@
       <h2>EMPRESAS</h2>
     </div>
     <hr />
-    <b-button variant="primary" @click="abrirModal" class="mb-2">Inserir Novo</b-button>
+    <b-button variant="primary" @click="abrirModal" class="mb-2"
+      >Inserir Novo</b-button
+    >
     <!-- Modal de Cadastro e Edição -->
     <b-modal
       id="modalCadastro"
@@ -12,23 +14,31 @@
       hide-footer
       @hidden="limparDados"
     >
-      <b-container fluid>        
-        <b-form >
-
-          <b-form-group
-            id="label1"
-            label="Razão Social"
-            label-for="campo1">
+      <b-container fluid>
+        <b-form>
+          <b-form-group id="label1" label="Razão Social" label-for="campo1">
             <b-form-input
               id="campo1"
               v-model.trim="$v.empresa.razaoSocial.$model"
-              required>
+              required
+            >
             </b-form-input>
-             <div class="error" v-if="!$v.empresa.razaoSocial.required">Razão Social Obrigatório.</div>
-             <div class="error" v-if="!$v.empresa.razaoSocial.minLength">Mínimo {{ $v.empresa.razaoSocial.$params.minLength.min }} caracteres.</div>
+            <div class="error" v-if="!$v.empresa.razaoSocial.required">
+              Razão Social Obrigatório.
+            </div>
+            <div class="error" v-if="!$v.empresa.razaoSocial.minLength">
+              Mínimo
+              {{ $v.empresa.razaoSocial.$params.minLength.min }} caracteres.
+            </div>
           </b-form-group>
 
-          <b-button type="submit" variant="success" class="mr-2" @click.prevent="salvar">Salvar</b-button>
+          <b-button
+            type="submit"
+            variant="success"
+            class="mr-2"
+            @click.prevent="salvar"
+            >Salvar</b-button
+          >
           <b-button class="mr-2" @click="fecharModal">Fechar</b-button>
         </b-form>
       </b-container>
@@ -69,7 +79,7 @@
 </template>
 
 <script>
-import {required, minLength, maxLength} from 'vuelidate/lib/validators'
+import { required, minLength, maxLength } from "vuelidate/lib/validators";
 
 export default {
   name: "Empresas",
@@ -88,26 +98,36 @@ export default {
         razaoSocial: "",
         cnpj: "",
         email: "",
-        logo: '',
+        logo: "",
       },
       empresas: [
-        { id: 1, razaoSocial: "Castelo Materiais Para Construção", cnpj: "02623245000109", email:'t.i@castelovirtual.com.br' },
-        { id: 2, razaoSocial: "Stoky Distribuidora", cnpj: "05701024000109", email: 'stoky@stoky.com.br' },
+        {
+          id: 1,
+          razaoSocial: "Castelo Materiais Para Construção",
+          cnpj: "02623245000109",
+          email: "t.i@castelovirtual.com.br",
+        },
+        {
+          id: 2,
+          razaoSocial: "Stoky Distribuidora",
+          cnpj: "05701024000109",
+          email: "stoky@stoky.com.br",
+        },
       ],
     };
   },
   validations: {
     empresa: {
-     razaoSocial:{
-       required,
-       minLength: minLength(5)
-     },
-     cnpj:{
-       required,
-       maxLength: maxLength(14),
-       minLength: minLength(14)
-     },
-    }
+      razaoSocial: {
+        required,
+        minLength: minLength(5),
+      },
+      cnpj: {
+        required,
+        maxLength: maxLength(14),
+        minLength: minLength(14),
+      },
+    },
   },
   methods: {
     abrirModal() {
@@ -115,7 +135,6 @@ export default {
       this.$bvModal.show("modalCadastro");
     },
     salvar() {
-   
       const id = this.empresa.id;
 
       if (id == null) {
@@ -123,11 +142,11 @@ export default {
           id: this.empresa.length + 1,
           razaoSocial: this.empresa.razaoSocial,
           cnpj: this.empresa.cnpj,
-          logo: this.empresa.logo
+          logo: this.empresa.logo,
         });
       } else {
         const empresa = this.empresas.filter((f) => f.id == id);
-        console.log(empresa)
+        console.log(empresa);
         //logica para atualizar o feriado
       }
 
@@ -135,7 +154,6 @@ export default {
       this.$bvModal.hide("modalCadastro");
     },
     excluir(item, index) {
-
       const empresa = this.empresas[index].razaoSocial;
       this.$bvModal
         .msgBoxConfirm(empresa, {
@@ -165,7 +183,7 @@ export default {
         razaoSocial: "",
         cnpj: "",
         email: "",
-        logo: '',
+        logo: "",
       };
     },
     fecharModal() {
@@ -173,7 +191,6 @@ export default {
       this.$bvModal.hide("modalCadastro");
     },
   },
- 
 };
 </script>
 
@@ -186,7 +203,7 @@ export default {
   text-align: center;
   margin: 10px;
 }
-.error{
+.error {
   color: red;
 }
 </style>

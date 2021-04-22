@@ -14,12 +14,13 @@ export default new Router({
       component: MenuPrincipal,
     },
     {
-      path: '/lancamentos',
+      path: '/lancamentos/',
       component: Lancamentos,
     },
     {
-      path: '/metas',
+      path: '/metas/:metaId',
       component: Metas,
+      props: true,
     },
   ],
 })

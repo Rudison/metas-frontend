@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="btnback ml-2">
-      <b-button-group>
+      <b-button-group vertical>
         <b-button
-          size="lg"
+          size="xl"
           variant="success"
           v-if="inicio"
           v-b-tooltip.hover
@@ -13,18 +13,18 @@
           <b-icon icon="house-door" aria-label="Inicio"></b-icon>
         </b-button>
         <b-button
-          size="lg"
+          size="xl"
           variant="primary"
           v-if="inicio"
           v-b-tooltip.hover
           title="Lançamentos"
-          @click="voltarInicio('lancamentos')"
+          @click="voltarInicio('/lancamentos')"
         >
           <b-icon icon="arrow-left-circle" aria-label="Inicio"></b-icon>
         </b-button>
 
         <b-button
-          size="lg"
+          size="xl"
           variant="outline-primary"
           v-b-modal.lancamento
           v-b-tooltip.hover
@@ -34,11 +34,15 @@
         </b-button>
       </b-button-group>
     </div>
+
+    <div></div>
+    <strong>Código: {{ metaId }}</strong>
   </div>
 </template>
 
 <script>
 export default {
+  props: ["metaId"],
   data() {
     return {
       inicio: true,
