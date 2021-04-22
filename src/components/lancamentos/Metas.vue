@@ -36,7 +36,7 @@
         <b-button
           size="xl"
           variant="outline-primary"
-          v-b-modal.lancamento
+          @click="abrirModalSemana"
           v-b-tooltip.hover
           title="Inserir Semana"
         >
@@ -45,6 +45,16 @@
       </b-button-group>
     </div>
 
+    <CardsMetasSemana :metaId="metaId" />
+
+    <b-modal
+      id="modalMetaSemana"
+      :title="`Metas da Semana - ${mesAnoMeta}`"
+      hide-footer
+    >
+      <MetasSemana :metaId="metaId" :fecharModalSem="fecharModalSemana" />
+    </b-modal>
+
     <b-modal
       id="modalMetaVendMes"
       :title="`Metas Vendedores Mensal - ${mesAnoMeta}`"
@@ -52,17 +62,17 @@
     >
       <MetasVendedorMes :metaId="metaId" />
     </b-modal>
-
-    <strong>Código: {{ metaId }}</strong>
   </div>
 </template>
 
 <script>
+import MetasSemana from "./MetasSemana";
 import MetasVendedorMes from "./MetasVendedorMes";
+import CardsMetasSemana from "./CardsMetasSemana";
 
 export default {
   props: ["metaId"],
-  components: { MetasVendedorMes },
+  components: { MetasSemana, MetasVendedorMes, CardsMetasSemana },
   data() {
     return {
       inicio: true,
@@ -75,6 +85,12 @@ export default {
     },
     abrirModalVendMes() {
       this.$bvModal.show("modalMetaVendMes");
+    },
+    abrirModalSemana() {
+      this.$bvModal.show("modalMetaSemana");
+    },
+    fecharModalSemana() {
+      this.$bvModal.hide("modalMetaSemana");
     },
   },
 };

@@ -34,7 +34,6 @@
     </b-container>
 
     <!-- Modal de Cadastro e Edição -->
-    <b-modal id="msgModal"></b-modal>
 
     <b-modal
       id="modalCadastro"
@@ -46,6 +45,7 @@
         <b-form>
           <b-form-group id="label1" label="Vendedor" label-for="campo1">
             <b-form-select
+              :disabled="metaVendedor.id != null"
               v-model="vendedorSelecionado"
               :options="vendedores"
             ></b-form-select>
@@ -72,7 +72,7 @@
             @click.prevent="salvar"
             >Salvar</b-button
           >
-          <b-button class="mr-2" @click="fecharModal()">Fechar</b-button>
+          <b-button class="mr-2" @click="fecharModal">Fechar</b-button>
         </b-form>
       </b-container>
     </b-modal>
@@ -107,6 +107,12 @@
               {{ (scope.emptyFilteredText = "Nenhum registro encontrado!") }}
             </strong>
           </p>
+        </template>
+
+        <template #cell(valorMetaMensal)="row">
+          <b-form v-model="row.item.valorMetaMensal" disabled>
+            {{ formatPrice(row.item.valorMetaMensal) }}
+          </b-form>
         </template>
 
         <template #cell(actions)="row">
@@ -182,7 +188,8 @@ export default {
       this.currentPage = 1;
     },
     abrirModal() {
-      this.tituloModal = "CADASTRAR";
+      this.limparDados();
+      this.tituloModal = "Cadastrar";
       this.$bvModal.show("modalCadastro");
     },
     listarVendedores() {
@@ -197,9 +204,15 @@ export default {
           this.metasVendedor = res.data;
         });
     },
+    formatPrice(value) {
+      let val = (value / 1).toFixed(2).replace(".", ",");
+      return "R$ " + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    },
     editar(item, index) {
       this.tituloModal = "Alterar";
+      this.vendedorSelecionado = item.vendedorId;
       this.metaVendedor = item;
+      this.metaVendedor.valorMetaMensal = +item.valorMetaMensal;
 
       this.$bvModal.show("modalCadastro");
     },
@@ -219,7 +232,7 @@ export default {
           })
           .catch((error) => {
             this.$bvModal.msgBoxOk(
-              `Erro incluir Feriado: ${this.feriado.descricao} ${error}`,
+              `Erro Incluir Meta Vendedor: ${this.feriado.descricao} ${error}`,
               {
                 title: "Atenção",
               }
@@ -242,7 +255,7 @@ export default {
           .catch((error) => {
             const erro = error.response.data.message;
             this.$bvModal.msgBoxOk(
-              `Erro alterar Feriado: ${this.feriado.descricao} ${erro}`
+              `Erro Alterar Meta Vendedor: ${this.feriado.descricao} ${erro}`
             );
             this.listar();
           });
@@ -252,10 +265,11 @@ export default {
       this.$bvModal.hide("modalCadastro");
     },
     excluir(item, index) {
-      const feriado = this.feriados[index].descricao;
+      const metaVendedor = item;
+      const descricao = `${metaVendedor.nome} - ${item.valorMetaMensal}`;
 
       this.$bvModal
-        .msgBoxConfirm(feriado, {
+        .msgBoxConfirm(descricao, {
           title: "Deseja Excluir Esse Registro?",
           size: "sm",
           buttonSize: "sm",
@@ -267,19 +281,29 @@ export default {
         })
         .then((value) => {
           if (value) {
-            axios.delete(`${baseApiUrl}/feriados/${item.id}`).then((res) => {
-              this.listar();
-              return res;
-            });
+            axios
+              .delete(`${baseApiUrl}/metasVendedorMes/${item.id}`)
+              .then((res) => {
+                this.listar();
+                return res;
+              })
+              .catch((error) => {
+                const erro = error.response.data.message;
+                this.$bvModal.msgBoxOk(
+                  `Erro ao Excluir: (${metaVendedor.nome}) ${erro}`
+                );
+              });
           }
         })
         .catch((err) => {
+          const erro = err.response.data.message;
           this.$bvModal.msgBoxOk(
-            `Erro excluir Feriado: ${this.feriado.nome} ${err}`
+            `Erro excluir valor Meta: ${this.metaVendedor.nome} ${erro}`
           );
         });
     },
     limparDados() {
+      this.vendedorSelecionado = null;
       this.metaVendedor = {
         id: null,
         metaId: null,

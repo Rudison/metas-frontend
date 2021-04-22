@@ -148,42 +148,42 @@
           </b-button>
         </template>
       </b-table>
-    </div>
 
-    <b-container fluid>
-      <b-row>
-        <b-col sm="4" md="4" class="my-1">
-          <b-form-group
-            label="Por página"
-            label-for="per-page-select"
-            label-cols-sm="6"
-            label-cols-md="4"
-            label-cols-lg="3"
-            label-align-sm="right"
-            label-size="sm"
-            class="mb-0"
-          >
-            <b-form-select
-              id="per-page-select"
-              v-model="perPage"
-              :options="pageOptions"
+      <b-container fluid>
+        <b-row>
+          <b-col sm="4" md="4" class="my-1">
+            <b-form-group
+              label="Por página"
+              label-for="per-page-select"
+              label-cols-sm="6"
+              label-cols-md="4"
+              label-cols-lg="3"
+              label-align-sm="right"
+              label-size="sm"
+              class="mb-0"
+            >
+              <b-form-select
+                id="per-page-select"
+                v-model="perPage"
+                :options="pageOptions"
+                size="sm"
+              ></b-form-select>
+            </b-form-group>
+          </b-col>
+
+          <b-col sm="7" md="6" class="my-1">
+            <b-pagination
+              v-model="currentPage"
+              :total-rows="totalRows"
+              :per-page="perPage"
+              align="fill"
               size="sm"
-            ></b-form-select>
-          </b-form-group>
-        </b-col>
-
-        <b-col sm="7" md="6" class="my-1">
-          <b-pagination
-            v-model="currentPage"
-            :total-rows="totalRows"
-            :per-page="perPage"
-            align="fill"
-            size="sm"
-            class="my-0"
-          ></b-pagination>
-        </b-col>
-      </b-row>
-    </b-container>
+              class="my-0"
+            ></b-pagination>
+          </b-col>
+        </b-row>
+      </b-container>
+    </div>
   </div>
 </template>
 
@@ -299,10 +299,10 @@ export default {
       this.$bvModal.hide("modalCadastro");
     },
     excluir(item, index) {
-      const feriado = this.feriados[index].descricao;
+      const feriado = item;
 
       this.$bvModal
-        .msgBoxConfirm(feriado, {
+        .msgBoxConfirm(feriado.descricao, {
           title: "Deseja Excluir Esse Registro?",
           size: "sm",
           buttonSize: "sm",
