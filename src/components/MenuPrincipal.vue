@@ -104,6 +104,7 @@ export default {
 }
 .menus {
   display: flex;
+  justify-content: flex-start;
   flex-direction: row;
   flex-wrap: wrap;
 }
@@ -112,6 +113,7 @@ export default {
   height: 200px;
   cursor: pointer;
   margin-bottom: 10px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
 }
 
 .grow {

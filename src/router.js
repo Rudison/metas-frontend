@@ -18,6 +18,7 @@ export default new Router({
       component: Lancamentos,
     },
     {
+      name: 'metas',
       path: '/metas/:metaId',
       component: Metas,
       props: true,

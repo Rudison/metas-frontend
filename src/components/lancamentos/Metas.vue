@@ -45,11 +45,15 @@
       </b-button-group>
     </div>
 
-    <CardsMetasSemana :metaId="metaId" />
+    <div class="titulo">
+      <h2>Metas {{ meta.Mes }}</h2>
+    </div>
+
+    <CardsMetasSemana :metaId="metaId" :meta="meta" />
 
     <b-modal
       id="modalMetaSemana"
-      :title="`Metas da Semana - ${mesAnoMeta}`"
+      :title="`Metas da Semana - ${meta.Mes}`"
       hide-footer
     >
       <MetasSemana :metaId="metaId" :fecharModalSem="fecharModalSemana" />
@@ -57,7 +61,7 @@
 
     <b-modal
       id="modalMetaVendMes"
-      :title="`Metas Vendedores Mensal - ${mesAnoMeta}`"
+      :title="`Metas Vendedores Mensal - ${meta.Mes}`"
       hide-footer
     >
       <MetasVendedorMes :metaId="metaId" />
@@ -71,12 +75,14 @@ import MetasVendedorMes from "./MetasVendedorMes";
 import CardsMetasSemana from "./CardsMetasSemana";
 
 export default {
-  props: ["metaId"],
+  props: {
+    metaId: { type: String },
+    meta: { type: Object },
+  },
   components: { MetasSemana, MetasVendedorMes, CardsMetasSemana },
   data() {
     return {
       inicio: true,
-      mesAnoMeta: "JAN/2021",
     };
   },
   methods: {
@@ -95,6 +101,12 @@ export default {
   },
 };
 </script>
-
-<style>
+<style scoped>
+.titulo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
 </style>

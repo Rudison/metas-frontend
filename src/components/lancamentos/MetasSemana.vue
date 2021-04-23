@@ -90,6 +90,7 @@ export default {
       semanaSelecionada: null,
       semanas: [],
       incluirFeriadoSemana: false,
+      submitStatus: "SUCCESS",
       metaSemana: {
         id: null,
         metaId: null,
@@ -116,26 +117,40 @@ export default {
       });
     },
     salvar() {
-      if (this.$v.$invalid) {
+      if (!this.$v.$invalid) {
         this.submitStatus = "ERROR";
         return;
       }
+
+      if (this.metaSemana.dataInicial > this.metaSemana.dataFinal) {
+        this.$bvModal.msgBoxOk("Data Inicial Menor que Final", {
+          title: "Atenção",
+        });
+        return;
+      }
+
       const id = this.metaSemana.id;
+
+      const metaSemana = {
+        metaId: this.metaId,
+        semanaId: this.semanaSelecionada,
+        dataInicial: this.metaSemana.dataInicial,
+        dataFinal: this.metaSemana.dataFinal,
+        diasAdicionais: this.metaSemana.diasAdicionais,
+        incluirFeriadoSemana: this.incluirFeriadoSemana,
+      };
 
       if (id == null) {
         axios
-          .post(`${baseApiUrl}/feriados`, this.feriado)
+          .post(`${baseApiUrl}/metasSemana`, metaSemana)
           .then((res) => {
             this.listar();
             return res;
           })
           .catch((error) => {
-            this.$bvModal.msgBoxOk(
-              `Erro Incluir Meta Vendedor: ${this.feriado.descricao} ${error}`,
-              {
-                title: "Atenção",
-              }
-            );
+            this.$bvModal.msgBoxOk(`Erro Incluir Meta Semana: ${error}`, {
+              title: "Atenção",
+            });
             return error;
           });
       }
@@ -156,7 +171,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .header {
   height: 80px;
   background-color: #4caf50;

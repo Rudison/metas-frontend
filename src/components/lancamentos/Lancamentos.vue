@@ -159,7 +159,7 @@
 
     <div class="menus">
       <b-card
-        class="ml-4 mb-3"
+        class="ml-4 mb-3 grow"
         :style="`background-color: #4caf50; width: ${widthCard}; max-width: 20rem`"
         v-for="m in metas"
         :key="m.id"
@@ -307,7 +307,12 @@ export default {
     },
     cardSelecionado(meta) {
       this.$router.push({
+        name: "metas",
         path: `/metas/${meta.id}`,
+        params: {
+          metaId: meta.id.toString(),
+          meta: meta,
+        },
       });
     },
     editar(id) {
@@ -439,7 +444,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .tituloMes {
   font-size: 1.3rem;
   color: #fff;
@@ -455,12 +460,21 @@ export default {
 }
 .menus {
   display: grid;
-  grid-template-columns: repeat(6, 17%);
+  align-content: center;
+  justify-content: center;
+  grid-template-columns: repeat(6, 15%);
   flex-direction: row;
   flex-wrap: wrap;
 }
 .card {
   cursor: pointer;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.25);
+}
+.grow {
+  transition: all 0.2s ease-in-out;
+}
+.grow:hover {
+  transform: scale(1.1);
 }
 .footerCard {
   color: #fff;

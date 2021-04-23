@@ -1,9 +1,29 @@
 <template>
   <div>
+    <b-modal
+      id="modalEditMetaSemana"
+      :title="`Metas da Semana - ${mesAnoMeta}`"
+      hide-footer
+    >
+      <MetasSemana :metaId="metaId" :fecharModalSem="fecharModalSemana" />
+    </b-modal>
+
+    <b-modal
+      size="lg"
+      id="modalGridMetaSemana"
+      :title="`Metas da - ${mesAnoMeta}`"
+      hide-footer
+    >
+      <MetasVendedorSemana
+        :meta="meta"
+        :fecharModalVendedores="fecharModalSemana"
+      />
+    </b-modal>
+
     <!-- Lançamentos -->
     <div class="menus">
       <b-card
-        class="ml-5 mr-5"
+        class="ml-5 mr-3 grow"
         :style="`background-color: #4caf50; width: ${widthCard}; max-width: 20rem`"
         v-for="metas in metasSemana"
         :key="metas.id"
@@ -22,7 +42,7 @@
             <strong>
               {{ converterData(metas.dataFinal) }}
             </strong>
-            <div class="titulosValores mt-2">Dias Uteis/Semana</div>
+            <div class="titulosValores">Dias Uteis/Semana</div>
             <strong>{{ metas.diasUteisSemana }}</strong>
           </b-list-group-item>
         </b-list-group>
@@ -30,6 +50,26 @@
         <b-card-footer>
           <b-button-group>
             <b-button
+              size="sm"
+              variant="primary"
+              v-b-tooltip.hover
+              title="Imprimir Semana"
+              @click.stop="editar(metas.id)"
+            >
+              <b-icon icon="printer" aria-label="Editar"></b-icon>
+            </b-button>
+
+            <b-button
+              size="sm"
+              variant="info"
+              v-b-tooltip.hover
+              title="Atualizar Semana(Blue)"
+              @click.stop="editar(metas.id)"
+            >
+              <b-icon icon="arrow-counterclockwise"></b-icon>
+            </b-button>
+            <b-button
+              v-if="metas.semanaId != 6"
               size="sm"
               variant="warning"
               v-b-tooltip.hover
@@ -40,6 +80,7 @@
             </b-button>
 
             <b-button
+              v-if="metas.semanaId != 6"
               size="sm"
               variant="danger"
               v-b-tooltip.hover
@@ -52,99 +93,6 @@
         </b-card-footer>
       </b-card>
     </div>
-
-    <div class="gridSemana mt-2">
-      <b-table
-        responsive="sm"
-        sticky-header="500px"
-        striped
-        hover
-        bordered
-        small
-        show-empty
-        head-variant="dark"
-        table-variant=""
-        :items="feriados"
-        :fields="fields"
-        :per-page="perPage"
-        :filter="filter"
-        :current-page="currentPage"
-        @filtered="onFiltered"
-      >
-        <template #empty="scope">
-          <p>
-            <strong>
-              {{ (scope.emptyText = "Sem registros cadastrados") }}
-            </strong>
-          </p>
-        </template>
-
-        <template #emptyfiltered="scope">
-          <p>
-            <strong>
-              {{ (scope.emptyFilteredText = "Nenhum registro encontrado!") }}
-            </strong>
-          </p>
-        </template>
-
-        <template #cell(dia)="row">
-          {{ converterData(row.item.dia, true) }}
-        </template>
-
-        <template #cell(actions)="row">
-          <b-button
-            class="mr-2"
-            size="sm"
-            @click="editar(row.item, row.index, $event.target)"
-            variant="warning"
-          >
-            <b-icon icon="pencil" aria-hidden="true">Editar</b-icon>
-          </b-button>
-          <b-button
-            size="sm"
-            @click="excluir(row.item, row.index, $event.target)"
-            variant="danger"
-          >
-            <b-icon icon="trash" aria-hidden="true">Excluir</b-icon>
-          </b-button>
-        </template>
-      </b-table>
-
-      <b-container fluid>
-        <b-row>
-          <b-col sm="4" md="4" class="my-1">
-            <b-form-group
-              label="Por página"
-              label-for="per-page-select"
-              label-cols-sm="6"
-              label-cols-md="4"
-              label-cols-lg="3"
-              label-align-sm="right"
-              label-size="sm"
-              class="mb-0"
-            >
-              <b-form-select
-                id="per-page-select"
-                v-model="perPage"
-                :options="pageOptions"
-                size="sm"
-              ></b-form-select>
-            </b-form-group>
-          </b-col>
-
-          <b-col sm="7" md="6" class="my-1">
-            <b-pagination
-              v-model="currentPage"
-              :total-rows="totalRows"
-              :per-page="perPage"
-              align="fill"
-              size="sm"
-              class="my-0"
-            ></b-pagination>
-          </b-col>
-        </b-row>
-      </b-container>
-    </div>
   </div>
 </template>
 
@@ -153,15 +101,22 @@ import { required } from "vuelidate/lib/validators";
 import axios from "axios";
 import { baseApiUrl } from "@/global";
 import moment from "moment";
+import MetasSemana from "./MetasSemana";
+import MetasVendedorSemana from "./MetasVendedorSemana";
 
 export default {
   name: "Lancamentos",
-  props: ["metaId"],
+  props: {
+    metaId: { type: String },
+  },
+  components: { MetasSemana, MetasVendedorSemana },
   mounted() {
     this.listar();
   },
   data() {
     return {
+      meta: this.$route.params.property,
+      mesAnoMeta: "teste",
       tituloMeta: "Nova",
       semanaSelecionada: null,
       semanas: [],
@@ -198,7 +153,7 @@ export default {
   },
   methods: {
     cardSelecionado(meta) {
-      console.log(meta);
+      this.$bvModal.show("modalGridMetaSemana");
     },
     editar(id) {
       this.tituloMeta = "Editar";
@@ -263,10 +218,9 @@ export default {
       }
     },
     excluir(id) {
-      const meta = this.metas.filter((m) => m.id == id);
-
+      const metasSemana = this.metasSemana.filter((m) => m.id == id);
       this.$bvModal
-        .msgBoxConfirm(`Meta: ${meta[0].Mes}`, {
+        .msgBoxConfirm(`Meta: ${metasSemana[0].descricao}`, {
           title: "Deseja Excluir Esse Registro?",
           size: "sm",
           buttonSize: "sm",
@@ -279,7 +233,7 @@ export default {
         .then((value) => {
           if (value) {
             axios
-              .delete(`${baseApiUrl}/metas/${id}`)
+              .delete(`${baseApiUrl}/metasSemana/${id}`)
               .then((res) => {
                 this.listar();
                 return res;
@@ -292,7 +246,9 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          this.$bvModal.msgBoxOk(`Erro excluir Meta: ${meta[0].Mes} ${err}`);
+          this.$bvModal.msgBoxOk(
+            `Erro excluir Meta: ${metasSemana[0].Mes} ${err}`
+          );
         });
     },
     fecharModalCadastro() {
@@ -318,11 +274,12 @@ export default {
         diasUteisMes: 0,
       };
     },
+    fecharModalSemana() {},
   },
 };
 </script>
 
-<style scoped>
+<style>
 .gridSemana {
   display: flex;
   flex-direction: row;
@@ -345,13 +302,23 @@ export default {
 .menus {
   display: grid;
   flex-direction: row;
-  grid-template-columns: repeat(6, 15%);
+  justify-content: center;
   align-content: center;
-  align-items: flex-end;
+  grid-template-columns: repeat(6, 15.5%);
   flex-wrap: wrap;
 }
 .card {
   cursor: pointer;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.25);
+}
+/* .card:hover {
+  border: 1px solid #000;
+} */
+.grow {
+  transition: all 0.2s ease-in-out;
+}
+.grow:hover {
+  transform: scale(1.1);
 }
 .footerCard {
   color: #fff;

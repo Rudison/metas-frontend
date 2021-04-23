@@ -1,6 +1,6 @@
 <template>
-  <div id="app" class="container1 grid-areas">
-    <div class="header">
+  <div id="app" class="container1">
+    <div class="headerArea">
       <Header :titulo="titulo" :icon="icon" />
     </div>
 
@@ -8,7 +8,7 @@
       <router-view />
     </div>
 
-    <div class="footer">
+    <div class="footerArea">
       <Footer />
     </div>
   </div>
@@ -32,6 +32,11 @@ export default {
 </script>
 
 <style>
+html,
+body {
+  height: 100%;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -39,53 +44,41 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
-
-html,
-body {
-  width: 100%;
-  height: 100vh;
-}
 .container1 {
   display: grid;
-  grid-template-rows: 11% auto 7%;
-  grid-template-columns: 50% 50%;
-  width: 100%;
-  height: 100vh;
+  grid-gap: 10px;
+  grid-template-columns: 1fr;
+  grid-template-areas: "headerArea" "bodyArea" "footerArea";
+  grid-template-rows: 60px 1fr 60px;
 }
-.header {
+.headerArea {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   width: 100%;
-  height: 100%;
+  height: 60px;
   color: #fff;
   background: #4caf50;
-  grid-area: header;
+  grid-area: headerArea;
 }
-.body {
-  display: flex;
-  flex-direction: row;
-  margin-top: 10px;
+.bodyArea {
+  justify-content: flex-start;
   width: 100%;
   height: 100%;
-  grid-area: body;
+  grid-area: bodyArea;
 }
-.footer {
+.footerArea {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  height: 60px;
   background: #4caf50;
-  grid-area: footer;
+  grid-area: footerArea;
 }
-
-.grid-areas {
+/* .grid-areas {
   grid-template-areas:
-    "header header"
-    "body body" "footer footer";
-}
+    "headerArea"
+    "bodyArea" "footerArea";
+} */
 </style>
