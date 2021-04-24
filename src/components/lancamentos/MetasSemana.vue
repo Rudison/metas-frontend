@@ -74,6 +74,7 @@
 import { required, minLength } from "vuelidate/lib/validators";
 import axios from "axios";
 import { baseApiUrl } from "@/global";
+import moment from "moment";
 
 export default {
   name: "MetasSemana",
@@ -132,31 +133,55 @@ export default {
       const id = this.metaSemana.id;
 
       const metaSemana = {
-        metaId: this.metaId,
+        metaId: +this.metaId,
         semanaId: this.semanaSelecionada,
-        dataInicial: this.metaSemana.dataInicial,
-        dataFinal: this.metaSemana.dataFinal,
+        dataInicial: this.converterData(this.metaSemana.dataInicial),
+        dataFinal: this.converterData(this.metaSemana.dataFinal),
         diasAdicionais: this.metaSemana.diasAdicionais,
         incluirFeriadoSemana: this.incluirFeriadoSemana,
       };
 
+      console.log(metaSemana);
+      console.log(this.converterData(this.metaSemana.dataInicial));
+
       if (id == null) {
         axios
-          .post(`${baseApiUrl}/metasSemana`, metaSemana)
+          .get(
+            `${baseApiUrl}/metasSemana/semanasRestantes/${metaSemana.metaId}`
+          )
           .then((res) => {
-            this.listar();
-            return res;
-          })
-          .catch((error) => {
-            this.$bvModal.msgBoxOk(`Erro Incluir Meta Semana: ${error}`, {
-              title: "Atenção",
-            });
-            return error;
+            const { semanasRestantes, semanasNoMes } = res.data;
+
+            if (semanasRestantes == "0" || semanasRestantes == "") {
+              this.$bvModal.msgBoxOk(
+                `Mês pode ter apenas ${semanasNoMes} semanas.`,
+                {
+                  title: "Atenção",
+                }
+              );
+              return;
+            } else {
+              axios
+                .post(`${baseApiUrl}/metasSemana`, metaSemana)
+                .then((res) => {
+                  this.listar();
+                  return res;
+                })
+                .catch((error) => {
+                  const erro = error.response.data.message;
+                  this.$bvModal.msgBoxOk(`Erro Incluir Meta Semana: ${erro}`, {
+                    title: "Atenção",
+                  });
+                });
+            }
           });
       }
 
       this.limparDados();
       this.$bvModal.hide("modalCadastro");
+    },
+    converterData(date) {
+      return moment(date).format("YYYY-MM-DD HH:mm");
     },
     limparDados() {
       this.vendedorSelecionado = null;

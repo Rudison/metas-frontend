@@ -262,7 +262,7 @@ export default {
       mesSelecionado: null,
       meses: [{ value: null, text: "Selecione o Mês" }],
       metas: [],
-      widthCard: "210px",
+      widthCard: "200px",
       meta: {
         id: null,
         mesId: 0,
@@ -321,6 +321,7 @@ export default {
 
       axios.get(`${baseApiUrl}/metas/${id}`).then((res) => {
         this.mesSelecionado = res.data.mesId;
+        this.id = res.data.id;
         this.meta = res.data;
         this.meta.valorMetaMensal = +res.data.valorMetaMensal;
       });
@@ -338,6 +339,8 @@ export default {
       this.$bvModal.hide("modalAno");
     },
     salvar() {
+      const id = this.meta.id;
+
       const meta = {
         mesId: this.mesSelecionado,
         ano: this.meta.ano,
@@ -345,7 +348,8 @@ export default {
         semanasNoMes: this.meta.semanasNoMes,
       };
 
-      const id = this.meta.id;
+      const mesSelecionado = this.meses[this.mesSelecionado - 1];
+      const Mes = `${mesSelecionado.text}/${meta.ano}`;
 
       if (id == null) {
         axios
@@ -353,6 +357,7 @@ export default {
           .then((res) => {
             this.listar();
             this.fecharModalCadastro();
+            this.alertaMensagem(`Meta (${Mes}) Adicionada.`);
             return res;
           })
           .catch((error) => {
@@ -368,6 +373,7 @@ export default {
           .then((res) => {
             this.listar();
             this.fecharModalCadastro();
+            this.alertaMensagem(`Meta (${Mes}) Alterado.`);
             return res;
           })
           .catch((error) => {
@@ -378,10 +384,10 @@ export default {
       }
     },
     excluir(id) {
-      const meta = this.metas.filter((m) => m.id == id);
+      const meta = this.metas.filter((m) => m.id == id)[0];
 
       this.$bvModal
-        .msgBoxConfirm(`Meta: ${meta[0].Mes}`, {
+        .msgBoxConfirm(`Meta: ${meta.Mes}`, {
           title: "Deseja Excluir Esse Registro?",
           size: "sm",
           buttonSize: "sm",
@@ -397,6 +403,7 @@ export default {
               .delete(`${baseApiUrl}/metas/${id}`)
               .then((res) => {
                 this.listar();
+                this.alertaMensagem(`Meta (${meta.Mes}) Excluido.`);
                 return res;
               })
               .catch((error) => {
@@ -427,6 +434,13 @@ export default {
     abrirInfo() {
       this.info = !this.info;
       this.widthCard = !this.info ? "210px" : "220px";
+    },
+    alertaMensagem(mensagem = "") {
+      this.$bvToast.toast(`${mensagem}`, {
+        title: "Sucesso",
+        variant: "success",
+        solid: true,
+      });
     },
     limparDados() {
       this.mesSelecionado = null;
