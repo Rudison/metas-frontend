@@ -1,6 +1,6 @@
 <template>
   <div class="vendedores">
-    <div class="header">
+    <div class="headerVendedor">
       <h2>VENDEDORES</h2>
     </div>
     <hr />
@@ -304,6 +304,7 @@ export default {
           .post(`${baseApiUrl}/vendedores`, vendedor)
           .then((res) => {
             this.listar();
+            this.alertaMensagem(`Vendedor (${vendedor.nome}) Adicionado.`);
             return res;
           })
           .catch((error) => {
@@ -328,6 +329,7 @@ export default {
           .put(`${baseApiUrl}/vendedores/${id}`, vendedor)
           .then((res) => {
             this.listar();
+            this.alertaMensagem(`Vendedor (${vendedor.nome}) Alterado.`);
             return res;
           })
           .catch((error) => {
@@ -359,6 +361,7 @@ export default {
           if (value) {
             axios.delete(`${baseApiUrl}/vendedores/${item.id}`).then((res) => {
               this.listar();
+              this.alertaMensagem(`Vendedor (${item.nome}) Excluido.`);
               return res;
             });
           }
@@ -373,6 +376,13 @@ export default {
       this.tituloModal = "ALTERAR";
       this.vendedor = item;
       this.$bvModal.show("modalCadastro");
+    },
+    alertaMensagem(mensagem = "") {
+      this.$bvToast.toast(`${mensagem}`, {
+        title: "Sucesso",
+        variant: "success",
+        solid: true,
+      });
     },
     limparDados() {
       this.vendedor = {
@@ -391,9 +401,12 @@ export default {
 </script>
 
 <style>
-.header {
-  height: 80px;
+.headerVendedor {
+  display: flex;
+  justify-content: center;
   background-color: #4caf50;
+  color: #fff;
+  border-radius: 5px;
 }
 .vendedores {
   text-align: center;

@@ -54,7 +54,7 @@
               variant="primary"
               v-b-tooltip.hover
               title="Imprimir Semana"
-              @click.stop="editar(metas.id)"
+              @click.stop="imprimir(metas.id)"
             >
               <b-icon icon="printer" aria-label="Editar"></b-icon>
             </b-button>
@@ -80,7 +80,7 @@
             </b-button>
 
             <b-button
-              v-if="metas.semanaId != 6"
+              v-if="metas.semanaId != 6 && ultimaSemana(metas.id)"
               size="sm"
               variant="danger"
               v-b-tooltip.hover
@@ -154,6 +154,14 @@ export default {
   methods: {
     cardSelecionado(meta) {
       this.$bvModal.show("modalGridMetaSemana");
+    },
+    imprimir(id) {
+      console.log("Imprimiu");
+    },
+    ultimaSemana(id) {
+      const semanas = this.metasSemana.filter((m) => m.semanaId != 6);
+      const ultimaSemana = semanas[semanas.length - 1];
+      return ultimaSemana.id == id;
     },
     editar(id) {
       this.tituloMeta = "Editar";

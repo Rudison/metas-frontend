@@ -1,6 +1,6 @@
 <template>
   <div class="feriados">
-    <div class="header">
+    <div class="headerFeriado">
       <h2>FERIADOS</h2>
     </div>
     <hr />
@@ -257,10 +257,13 @@ export default {
 
       if (this.feriado.dia == null) return;
 
+      const descricao = this.feriado.descricao;
+
       if (id == null) {
         axios
           .post(`${baseApiUrl}/feriados`, this.feriado)
           .then((res) => {
+            this.alertaMensagem(`Feriado (${descricao}) Adicionado.`);
             this.listar();
             return res;
           })
@@ -284,6 +287,7 @@ export default {
           .put(`${baseApiUrl}/feriados/${id}`, feriado)
           .then((res) => {
             this.listar();
+            this.alertaMensagem(`Feriado (${descricao}) Alterado.`);
             return res;
           })
           .catch((error) => {
@@ -294,7 +298,6 @@ export default {
             this.listar();
           });
       }
-
       this.limparDados();
       this.$bvModal.hide("modalCadastro");
     },
@@ -316,6 +319,7 @@ export default {
           if (value) {
             axios.delete(`${baseApiUrl}/feriados/${item.id}`).then((res) => {
               this.listar();
+              this.alertaMensagem(`Feriado (${feriado.descricao}) Excluido.`);
               return res;
             });
           }
@@ -332,6 +336,13 @@ export default {
       this.feriado = item;
 
       this.$bvModal.show("modalCadastro");
+    },
+    alertaMensagem(mensagem = "") {
+      this.$bvToast.toast(`${mensagem}`, {
+        title: "Sucesso",
+        variant: "success",
+        solid: true,
+      });
     },
     limparDados() {
       this.feriado = {
@@ -355,9 +366,12 @@ export default {
 </script>
 
 <style>
-.header {
-  height: 80px;
+.headerFeriado {
+  display: flex;
+  justify-content: center;
   background-color: #4caf50;
+  color: #fff;
+  border-radius: 5px;
 }
 .feriados {
   text-align: center;

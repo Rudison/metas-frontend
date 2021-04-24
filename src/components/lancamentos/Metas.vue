@@ -46,7 +46,12 @@
     </div>
 
     <div class="titulo">
-      <h2>Metas {{ meta.Mes }}</h2>
+      <b-alert
+        variant="success"
+        style="box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.25)"
+        show
+        >META - {{ meta.Mes }}</b-alert
+      >
     </div>
 
     <CardsMetasSemana :metaId="metaId" :meta="meta" />

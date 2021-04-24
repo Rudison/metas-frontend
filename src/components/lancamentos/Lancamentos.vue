@@ -474,6 +474,7 @@ export default {
   transition: all 0.2s ease-in-out;
 }
 .grow:hover {
+  z-index: 1;
   transform: scale(1.1);
 }
 .footerCard {

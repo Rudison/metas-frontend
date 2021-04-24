@@ -23,8 +23,8 @@ export default {
   components: { Header, Footer },
   data() {
     return {
-      titulo: "PRINCIPAL",
-      icon: "house-door",
+      titulo: "Sistema de Metas",
+      icon: "graph-up",
     };
   },
   methods: {},
