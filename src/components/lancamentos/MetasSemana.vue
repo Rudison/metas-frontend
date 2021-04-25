@@ -46,7 +46,7 @@
         <b-form-group label="Incluir Feriado Semana?" label-for="inputDtFinal">
           <b-form-checkbox
             id="checkFeriado"
-            v-model="incluirFeriadoSemana"
+            v-model="incluirFeriadoDaSemana"
           ></b-form-checkbox>
         </b-form-group>
 
@@ -90,7 +90,7 @@ export default {
       tituloModal: "Cadastrar",
       semanaSelecionada: null,
       semanas: [],
-      incluirFeriadoSemana: false,
+      incluirFeriadoDaSemana: false,
       submitStatus: "SUCCESS",
       metaSemana: {
         id: null,
@@ -138,11 +138,8 @@ export default {
         dataInicial: this.converterData(this.metaSemana.dataInicial),
         dataFinal: this.converterData(this.metaSemana.dataFinal),
         diasAdicionais: this.metaSemana.diasAdicionais,
-        incluirFeriadoSemana: this.incluirFeriadoSemana,
+        incluirFeriadoDaSemana: this.incluirFeriadoSemana,
       };
-
-      console.log(metaSemana);
-      console.log(this.converterData(this.metaSemana.dataInicial));
 
       if (id == null) {
         axios
@@ -162,12 +159,13 @@ export default {
               return;
             } else {
               axios
-                .post(`${baseApiUrl}/metasSemana`, metaSemana)
+                .post(`${baseApiUrl}/metasSemana/`, metaSemana)
                 .then((res) => {
                   this.listar();
                   return res;
                 })
                 .catch((error) => {
+                  console.log(error.response);
                   const erro = error.response.data.message;
                   this.$bvModal.msgBoxOk(`Erro Incluir Meta Semana: ${erro}`, {
                     title: "Atenção",

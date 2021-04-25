@@ -221,18 +221,45 @@ export default {
         this.submitStatus = "ERROR";
         return;
       }
+
       const id = this.metaVendedor.id;
 
+      const vendedorSelecionado = this.vendedores.filter(
+        (f) => f.value == this.vendedorSelecionado
+      )[0];
+
+      const vendedor = `${vendedorSelecionado.text}/${this.formatPrice(
+        this.metaVendedor.valorMetaMensal
+      )}`;
+
+      const vendedorJaCadastrado = this.metasVendedor.filter(
+        (m) => m.vendedorId == this.vendedorSelecionado
+      ).length;
+
       if (id == null) {
+        if (vendedorJaCadastrado > 0) {
+          this.$bvModal.msgBoxOk(`Já existe (${vendedor}) cadastrado.`, {
+            title: "Atenção",
+          });
+          return;
+        }
+
+        const metaVendedor = {
+          metaId: this.metaId,
+          vendedorId: this.vendedorSelecionado,
+          valorMetaMensal: this.metaVendedor.valorMetaMensal,
+        };
+
         axios
-          .post(`${baseApiUrl}/feriados`, this.feriado)
+          .post(`${baseApiUrl}/metasVendedorMes`, metaVendedor)
           .then((res) => {
             this.listar();
+            this.alertaMensagem(`Meta Vendedor (${vendedor}) Adicionado.`);
             return res;
           })
           .catch((error) => {
             this.$bvModal.msgBoxOk(
-              `Erro Incluir Meta Vendedor: ${this.feriado.descricao} ${error}`,
+              `Erro Incluir Meta Vendedor: ${vendedor} ${error}`,
               {
                 title: "Atenção",
               }
@@ -240,22 +267,21 @@ export default {
             return error;
           });
       } else {
-        const dia = this.converterData(`${this.feriado.dia} 00:00`, false);
-
-        const feriado = {
-          descricao: this.feriado.descricao,
-          dia,
+        const metaVendedor = {
+          valorMetaMensal: this.metaVendedor.valorMetaMensal,
         };
+
         axios
-          .put(`${baseApiUrl}/feriados/${id}`, feriado)
+          .put(`${baseApiUrl}/metasVendedorMes/${id}`, metaVendedor)
           .then((res) => {
             this.listar();
+            this.alertaMensagem(`Meta Vendedor (${vendedor}) Alterado.`);
             return res;
           })
           .catch((error) => {
             const erro = error.response.data.message;
             this.$bvModal.msgBoxOk(
-              `Erro Alterar Meta Vendedor: ${this.feriado.descricao} ${erro}`
+              `Erro Alterar Meta Vendedor: ${vendedor} ${erro}`
             );
             this.listar();
           });
@@ -266,7 +292,9 @@ export default {
     },
     excluir(item, index) {
       const metaVendedor = item;
-      const descricao = `${metaVendedor.nome} - ${item.valorMetaMensal}`;
+      const descricao = `${metaVendedor.nome} - ${this.formatPrice(
+        item.valorMetaMensal
+      )}`;
 
       this.$bvModal
         .msgBoxConfirm(descricao, {
@@ -282,15 +310,19 @@ export default {
         .then((value) => {
           if (value) {
             axios
-              .delete(`${baseApiUrl}/metasVendedorMes/${item.id}`)
+              .delete(
+                `${baseApiUrl}/metasVendedorMes/${item.id}/${this.metaId}/${item.vendedorId}`
+              )
               .then((res) => {
                 this.listar();
+                this.alertaMensagem(`Meta Vendedor (${descricao}) Excluido.`);
                 return res;
               })
               .catch((error) => {
                 const erro = error.response.data.message;
+                console.log(error.response.data);
                 this.$bvModal.msgBoxOk(
-                  `Erro ao Excluir: (${metaVendedor.nome}) ${erro}`
+                  `Erro ao Excluir: (${descricao}) ${erro}`
                 );
               });
           }
@@ -301,6 +333,13 @@ export default {
             `Erro excluir valor Meta: ${this.metaVendedor.nome} ${erro}`
           );
         });
+    },
+    alertaMensagem(mensagem = "") {
+      this.$bvToast.toast(`${mensagem}`, {
+        title: "Sucesso",
+        variant: "success",
+        solid: true,
+      });
     },
     limparDados() {
       this.vendedorSelecionado = null;

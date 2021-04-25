@@ -399,22 +399,17 @@ export default {
         })
         .then((value) => {
           if (value) {
-            axios
-              .delete(`${baseApiUrl}/metas/${id}`)
-              .then((res) => {
-                this.listar();
-                this.alertaMensagem(`Meta (${meta.Mes}) Excluido.`);
-                return res;
-              })
-              .catch((error) => {
-                const erro = error.response.data.message;
-                console.log(erro);
-              });
+            this.excluirMetaVendSemana(id, meta.Mes);
+            this.excluirMetasSemana(id, meta.Mes);
+            this.excluirMetasVendedorMes(id, meta.Mes);
+            setTimeout(() => {
+              this.excluirMeta(id, meta.Mes);
+            }, 500);
           }
         })
         .catch((err) => {
           console.log(err);
-          this.$bvModal.msgBoxOk(`Erro excluir Meta: ${meta[0].Mes} ${err}`);
+          this.$bvModal.msgBoxOk(`Erro excluir Meta: ${meta.Mes} ${err}`);
         });
     },
     getMeses() {
@@ -453,6 +448,58 @@ export default {
         semanasNoMes: 0,
         diasUteisMes: 0,
       };
+    },
+    excluirMeta(metaId, mes) {
+      axios
+        .delete(`${baseApiUrl}/metas/${metaId}`)
+        .then((res) => {
+          this.listar();
+          this.alertaMensagem(`Meta (${mes}) Excluido.`);
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          console.log(erro);
+        });
+    },
+    excluirMetaVendSemana(metaId, mes) {
+      axios
+        .delete(`${baseApiUrl}/metasVendedorSemana/vendedorSemana/${metaId}`)
+        .then((res) => {
+          this.listar();
+          this.alertaMensagem(`Metas Vendedor Semana (${mes}) Excluido.`);
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          console.log(erro);
+        });
+    },
+    excluirMetasSemana(metaId, mes) {
+      axios
+        .delete(`${baseApiUrl}/metasSemana/semanas/${metaId}`)
+        .then((res) => {
+          this.listar();
+          this.alertaMensagem(`Metas Semana (${mes}) Excluido.`);
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          console.log(erro);
+        });
+    },
+    excluirMetasVendedorMes(metaId, mes) {
+      axios
+        .delete(`${baseApiUrl}/metasVendedorMes/metasMes/${metaId}`)
+        .then((res) => {
+          this.listar();
+          this.alertaMensagem(`Metas Vendedor Mês (${mes}) Excluido.`);
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          console.log(erro);
+        });
     },
   },
 };
