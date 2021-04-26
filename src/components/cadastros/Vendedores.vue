@@ -43,7 +43,10 @@
     <b-modal
       id="modalCadastro"
       :title="`${tituloModal} VENDEDOR`"
+      header-bg-variant="success"
+      header-text-variant="light"
       hide-footer
+      no-close-on-esc
       @hidden="limparDados"
     >
       <b-container fluid>

@@ -55,11 +55,14 @@
       >
     </div>
 
-    <CardsMetasSemana :metaId="metaId" :meta="meta" />
+    <CardsMetasSemana :metaId="metaId" :meta="meta" :mes="meta.Mes" />
 
     <b-modal
       id="modalMetaSemana"
       :title="`Metas da Semana - ${meta.Mes}`"
+      header-bg-variant="success"
+      header-text-variant="light"
+      no-close-on-esc
       hide-footer
     >
       <MetasSemana :metaId="metaId" :fecharModalSem="fecharModalSemana" />
@@ -67,7 +70,10 @@
 
     <b-modal
       id="modalMetaVendMes"
+      header-bg-variant="success"
+      header-text-variant="light"
       :title="`Metas Vendedores Mensal - ${meta.Mes}`"
+      no-close-on-esc
       hide-footer
     >
       <MetasVendedorMes

@@ -11,7 +11,10 @@
     <b-modal
       size="lg"
       id="modalGridMetaSemana"
-      :title="`Metas da - ${mesAnoMeta}`"
+      header-bg-variant="success"
+      header-text-variant="light"
+      header-class="justify-content-center"
+      :title="`Lançamento ${this.descricao} - ${mes}`"
       hide-footer
     >
       <MetasVendedorSemana
@@ -108,6 +111,7 @@ export default {
   name: "Lancamentos",
   props: {
     metaId: { type: String },
+    mes: { type: String },
   },
   components: { MetasSemana, MetasVendedorSemana },
   mounted() {
@@ -131,6 +135,7 @@ export default {
         dataFinal: null,
         diasUteisSemana: 0,
       },
+      descricao: "",
       info: false,
     };
   },
@@ -153,6 +158,8 @@ export default {
   },
   methods: {
     cardSelecionado(meta) {
+      this.descricao = meta.descricao;
+      this.meta = meta;
       this.$bvModal.show("modalGridMetaSemana");
     },
     imprimir(id) {
