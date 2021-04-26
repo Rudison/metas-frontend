@@ -144,7 +144,7 @@ import { baseApiUrl } from "@/global";
 
 export default {
   name: "MetasVendedoresMes",
-  props: ["metaId"],
+  props: ["metaId", "qtdMetasVendMes"],
   mounted() {
     this.listar();
     this.listarVendedores();
@@ -202,6 +202,7 @@ export default {
         .get(`${baseApiUrl}/metasVendedorMes/vendedorMetaSelect/${this.metaId}`)
         .then((res) => {
           this.metasVendedor = res.data;
+          this.$emit("metasVendedores", this.metasVendedor.length);
         });
     },
     formatPrice(value) {

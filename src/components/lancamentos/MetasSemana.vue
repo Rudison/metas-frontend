@@ -141,6 +141,9 @@ export default {
         incluirFeriadoDaSemana: this.incluirFeriadoSemana,
       };
 
+      const semanSelecionada = this.semanas[this.semanaSelecionada - 1];
+      const semana = `${semanSelecionada.text}`;
+
       if (id == null) {
         axios
           .get(
@@ -161,13 +164,13 @@ export default {
               axios
                 .post(`${baseApiUrl}/metasSemana/`, metaSemana)
                 .then((res) => {
-                  this.listar();
+                  console.log("res", res);
+                  this.listarSemanas();
+                  this.alertaMensagem(`(${semana}) Adicionada.`);
                   return res;
                 })
                 .catch((error) => {
-                  console.log(error.response);
-                  const erro = error.response.data.message;
-                  this.$bvModal.msgBoxOk(`Erro Incluir Meta Semana: ${erro}`, {
+                  this.$bvModal.msgBoxOk(`Erro Incluir Meta Semana: ${error}`, {
                     title: "Atenção",
                   });
                 });
@@ -177,6 +180,13 @@ export default {
 
       this.limparDados();
       this.$bvModal.hide("modalCadastro");
+    },
+    alertaMensagem(mensagem = "") {
+      this.$bvToast.toast(`${mensagem}`, {
+        title: "Sucesso",
+        variant: "success",
+        solid: true,
+      });
     },
     converterData(date) {
       return moment(date).format("YYYY-MM-DD HH:mm");

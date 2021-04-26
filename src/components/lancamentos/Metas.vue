@@ -38,6 +38,7 @@
           variant="outline-primary"
           @click="abrirModalSemana"
           v-b-tooltip.hover
+          v-if="qtdMetasVendMes > 0"
           title="Inserir Semana"
         >
           <b-icon icon="calendar2-date"></b-icon>
@@ -69,7 +70,10 @@
       :title="`Metas Vendedores Mensal - ${meta.Mes}`"
       hide-footer
     >
-      <MetasVendedorMes :metaId="metaId" />
+      <MetasVendedorMes
+        :metaId="metaId"
+        @metasVendedores="qtdMetasVendMes = $event"
+      />
     </b-modal>
   </div>
 </template>
@@ -78,6 +82,9 @@
 import MetasSemana from "./MetasSemana";
 import MetasVendedorMes from "./MetasVendedorMes";
 import CardsMetasSemana from "./CardsMetasSemana";
+
+import axios from "axios";
+import { baseApiUrl } from "@/global";
 
 export default {
   props: {
@@ -88,9 +95,20 @@ export default {
   data() {
     return {
       inicio: true,
+      qtdMetasVendMes: 0,
     };
   },
+  mounted() {
+    this.listarMetasVendMes();
+  },
   methods: {
+    listarMetasVendMes() {
+      axios
+        .get(`${baseApiUrl}/metasVendedorMes/vendedorMetaSelect/${this.metaId}`)
+        .then((res) => {
+          this.qtdMetasVendMes = res.data.length;
+        });
+    },
     voltarInicio(rota) {
       this.$router.push(`${rota}`);
     },
