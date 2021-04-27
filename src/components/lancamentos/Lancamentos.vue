@@ -216,27 +216,40 @@
         </b-list-group>
 
         <b-card-footer class="footerCard">
-          <b-icon
+          <!-- <b-icon
             class="mr-2"
             :variant="m.percentual >= 100 ? 'light' : 'danger'"
             :icon="
               m.percentual >= 100 ? 'arrow-up-circle' : 'arrow-down-circle'
             "
-          ></b-icon>
-          {{ m.percentual }}%
-          <b-button
-            variant="outline-light"
-            class="ml-2"
-            size="sm"
-            v-b-tooltip.hover
-            title="Detalhes"
-            @click.prevent.stop="abrirInfo"
-          >
-            <b-icon
-              :variant="!info ? 'outline-info' : 'outline-success'"
-              :icon="!info ? 'info-circle' : 'house-door'"
-            ></b-icon>
-          </b-button>
+          ></b-icon> -->
+          <div class="rodape">
+            <b-iconstack font-scale="1.5" animation="fade">
+              <b-icon
+                stacked
+                :icon="
+                  m.percentual >= 100 ? 'arrow-up-circle' : 'arrow-down-circle'
+                "
+                :variant="m.percentual >= 100 ? 'success' : 'danger'"
+                scale="0.75"
+                shift-v="-0.25"
+              ></b-icon>
+            </b-iconstack>
+            {{ m.percentual }}%
+            <b-button
+              variant="outline-light"
+              class="ml-2"
+              size="sm"
+              v-b-tooltip.hover
+              title="Detalhes"
+              @click.prevent.stop="abrirInfo"
+            >
+              <b-icon
+                :variant="!info ? 'outline-info' : 'outline-success'"
+                :icon="!info ? 'info-circle' : 'house-door'"
+              ></b-icon>
+            </b-button>
+          </div>
         </b-card-footer>
       </b-card>
     </div>
@@ -542,5 +555,10 @@ export default {
   color: #fff;
   font-size: 1.3rem;
   font-weight: bold;
+}
+.rodape {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 </style>

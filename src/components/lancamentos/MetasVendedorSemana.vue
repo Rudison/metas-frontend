@@ -27,11 +27,6 @@
             </b-input-group>
           </b-form-group>
         </b-col>
-        <b-col lg="6" class="my-1">
-          <b-button variant="primary" size="sm" @click="abrirModal" class="mb-2"
-            >Inserir Novo</b-button
-          >
-        </b-col>
       </b-row>
     </b-container>
 
@@ -156,13 +151,6 @@
             variant="warning"
           >
             <b-icon icon="pencil" aria-hidden="true">Editar</b-icon>
-          </b-button>
-          <b-button
-            size="sm"
-            @click="excluir(row.item, row.index, $event.target)"
-            variant="danger"
-          >
-            <b-icon icon="trash" aria-hidden="true">Excluir</b-icon>
           </b-button>
         </template>
       </b-table>

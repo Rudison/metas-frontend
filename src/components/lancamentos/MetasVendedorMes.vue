@@ -310,29 +310,48 @@ export default {
         })
         .then((value) => {
           if (value) {
-            axios
-              .delete(
-                `${baseApiUrl}/metasVendedorMes/${item.id}/${this.metaId}/${item.vendedorId}`
-              )
-              .then((res) => {
-                this.listar();
-                this.alertaMensagem(`Meta Vendedor (${descricao}) Excluido.`);
-                return res;
-              })
-              .catch((error) => {
-                const erro = error.response.data.message;
-                console.log(error.response.data);
-                this.$bvModal.msgBoxOk(
-                  `Erro ao Excluir: (${descricao}) ${erro}`
-                );
-              });
+            this.excluirVendedorPorSemana(item);
+
+            setTimeout(() => {
+              axios
+                .delete(
+                  `${baseApiUrl}/metasVendedorMes/${item.id}/${this.metaId}/${item.vendedorId}`
+                )
+                .then((res) => {
+                  this.listar();
+                  this.alertaMensagem(`Meta Vendedor (${descricao}) Excluido.`);
+                  return res;
+                })
+                .catch((error) => {
+                  const erro = error.response.data.message;
+                  console.log(error.response.data);
+                  this.$bvModal.msgBoxOk(
+                    `Erro ao Excluir: (${descricao}) ${erro}`
+                  );
+                });
+            }, 300);
           }
         })
         .catch((err) => {
           const erro = err.response.data.message;
           this.$bvModal.msgBoxOk(
-            `Erro excluir valor Meta: ${this.metaVendedor.nome} ${erro}`
+            `Erro excluir valor Meta: ${item.nome} ${erro}`
           );
+        });
+    },
+    excluirVendedorPorSemana(item) {
+      axios
+        .delete(
+          `${baseApiUrl}/metasVendedorSemana/porSemana/${item.metaId}/${item.vendedorId}`
+        )
+        .then((res) => {
+          this.listar();
+          this.alertaMensagem(`Meta Vendedor Semana (${item.nome}) Excluido.`);
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          this.$bvModal.msgBoxOk(`Erro ao Excluir: (${item.nome}) ${erro}`);
         });
     },
     alertaMensagem(mensagem = "") {
