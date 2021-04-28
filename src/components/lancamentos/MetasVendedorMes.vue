@@ -276,6 +276,7 @@ export default {
           .put(`${baseApiUrl}/metasVendedorMes/${id}`, metaVendedor)
           .then((res) => {
             this.listar();
+
             this.alertaMensagem(`Meta Vendedor (${vendedor}) Alterado.`);
             return res;
           })
@@ -286,6 +287,9 @@ export default {
             );
             this.listar();
           });
+
+        if (!this.existeVendedorSemana(this.metaId, this.vendedorSelecionado))
+          this.alterarMetaMensalVendedor(id, vendedor);
       }
 
       this.limparDados();
@@ -353,6 +357,46 @@ export default {
           const erro = error.response.data.message;
           this.$bvModal.msgBoxOk(`Erro ao Excluir: (${item.nome}) ${erro}`);
         });
+    },
+    alterarMetaMensalVendedor(id, vendedor) {
+      const metaVendedor = {
+        valorPrevisto: this.metaVendedor.valorMetaMensal,
+      };
+
+      axios
+        .patch(
+          `${baseApiUrl}/metasVendedorSemana/metaMesVendedor/${this.metaId}/${this.vendedorSelecionado}`,
+          metaVendedor
+        )
+        .then((res) => {
+          this.listar();
+          this.alertaMensagem(`Meta Vendedor Mensal (${vendedor}) Alterado.`);
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          this.$bvModal.msgBoxOk(
+            `Erro Alterar Meta Vendedor: ${vendedor} ${erro}`
+          );
+          this.listar();
+        });
+    },
+    existeVendedorSemana(metaId, vendedorId) {
+      let qtd = "";
+      axios
+        .get(
+          `${baseApiUrl}/metasVendedorSemana/existeMetaSemana/${metaId}/${vendedorId}`
+        )
+        .then((res) => {
+          const { id } = res.data;
+          qtd = id;
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          this.$bvModal.msgBoxOk(`Meta Vendedor não encontrado: ${erro}`);
+        });
+      return qtd;
     },
     alertaMensagem(mensagem = "") {
       this.$bvToast.toast(`${mensagem}`, {

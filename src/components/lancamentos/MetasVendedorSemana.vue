@@ -35,41 +35,36 @@
 
     <b-modal
       id="modalCadastro"
-      :title="`${tituloModal} FERIADO`"
+      title="Alterar Valor Previsto"
+      header-bg-variant="success"
+      header-text-variant="light"
       hide-footer
       @hidden="limparDados"
     >
       <b-container fluid>
         <b-form>
-          <b-form-group id="label1" label="Descrição" label-for="campo1">
-            <b-form-input
-              id="campo1"
-              v-model.trim="$v.feriado.descricao.$model"
-              required
-            ></b-form-input>
-            <div class="error" v-if="!$v.feriado.descricao.required">
-              Descrição Obrigatório.
-            </div>
-            <div class="error" v-if="!$v.feriado.descricao.minLength">
-              Mínimo
-              {{ $v.feriado.descricao.$params.minLength.min }} caracteres.
+          <b-form-group id="label1" label="Vendedor" label-for="campo1">
+            <b-form-select
+              disabled
+              v-model="vendedorSelecionado"
+              :options="vendedores"
+            ></b-form-select>
+            <div class="error" v-if="!$v.vendedorSelecionado.required">
+              Vendedor é Obrigatório.
             </div>
           </b-form-group>
 
-          <b-form-group label="Dia do Feriado" label-for="inputFeriado">
-            <b-form-datepicker
-              id="inputFeriado"
-              locale="pt-BR"
-              format="DD-MM-YYYY HH:MM"
-              today-button
-              reset-button
-              placeholder="Selecione Uma Data"
-              v-model="$v.feriado.dia.$model"
-            ></b-form-datepicker>
-            <div class="error" v-if="!$v.feriado.dia.required">
-              Dia Obrigatório.
+          <b-form-group id="lb3" label="Valor Meta Mensal" label-for="camp3">
+            <currency-input
+              :Value="vendedorSemana.valorPrevisto"
+              v-model="vendedorSemana.valorPrevisto"
+              class="form-control"
+            />
+            <div class="error" v-if="!$v.vendedorSemana.valorPrevisto.required">
+              Valor Previsto é Obrigatório.
             </div>
           </b-form-group>
+
           <b-button
             type="submit"
             variant="success"
@@ -143,7 +138,7 @@
           </b-form>
         </template>
 
-        <template #cell(actions)="row">
+        <template #cell(actions)="row" v-if="meta.semanaId != 6">
           <b-button
             class="mr-2"
             size="sm"
@@ -206,6 +201,7 @@ export default {
   },
   mounted() {
     this.listar();
+    this.listarVendedores();
   },
   data() {
     return {
@@ -218,7 +214,9 @@ export default {
         { key: "percentual", label: "Percentual", sortable: true },
         { key: "actions", label: "Ações" },
       ],
-      vendorSemana: {
+      vendedorSelecionado: null,
+      vendedores: [],
+      vendedorSemana: {
         id: null,
         metaId: null,
         metaSemanaId: null,
@@ -237,12 +235,9 @@ export default {
     };
   },
   validations: {
-    feriado: {
-      descricao: {
-        required,
-        minLength: minLength(3),
-      },
-      dia: {
+    vendedorSelecionado: { required },
+    vendedorSemana: {
+      valorPrevisto: {
         required,
       },
     },
@@ -256,6 +251,11 @@ export default {
       this.tituloModal = "CADASTRAR";
       this.$bvModal.show("modalCadastro");
     },
+    listarVendedores() {
+      axios.get(`${baseApiUrl}/vendedores/vendedoresSelect/`).then((res) => {
+        this.vendedores = res.data;
+      });
+    },
     listar() {
       axios
         .get(
@@ -266,95 +266,49 @@ export default {
           this.totalRows = res.data.length;
         });
     },
+    editar(item, index) {
+      this.vendedorSemana = item;
+      this.vendedorSelecionado = item.vendedorId;
+      this.vendedorSemana.valorPrevisto = +item.valorPrevisto;
+
+      this.$bvModal.show("modalCadastro");
+    },
     salvar() {
       if (this.$v.$invalid) {
         this.submitStatus = "ERROR";
         return;
       }
 
-      const id = this.feriado.id;
+      const vendedorSelecionado = this.vendedores.filter(
+        (f) => f.value == this.vendedorSelecionado
+      )[0];
 
-      if (this.feriado.dia == null) return;
+      const vendedor = `${vendedorSelecionado.text}/${this.formatPrice(
+        this.vendedorSemana.valorPrevisto
+      )}`;
 
-      const descricao = this.feriado.descricao;
+      const vendedorSemana = {
+        valorPrevisto: this.vendedorSemana.valorPrevisto,
+      };
 
-      if (id == null) {
-        axios
-          .post(`${baseApiUrl}/feriados`, this.feriado)
-          .then((res) => {
-            this.alertaMensagem(`Feriado (${descricao}) Adicionado.`);
-            this.listar();
-            return res;
-          })
-          .catch((error) => {
-            this.$bvModal.msgBoxOk(
-              `Erro incluir Feriado: ${this.feriado.descricao} ${error}`,
-              {
-                title: "Atenção",
-              }
-            );
-            return error;
-          });
-      } else {
-        const dia = this.converterData(`${this.feriado.dia} 00:00`, false);
+      axios
+        .put(
+          `${baseApiUrl}/metasVendedorSemana/${this.vendedorSemana.id}`,
+          vendedorSemana
+        )
+        .then((res) => {
+          this.listar();
+          this.alertaMensagem(`Vendedor (${vendedor}) Alterado.`);
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          this.$bvModal.msgBoxOk(`Erro alterar Vendedor: ${vendedor} ${erro}`);
+          this.listar();
+        });
 
-        const feriado = {
-          descricao: this.feriado.descricao,
-          dia,
-        };
-        axios
-          .put(`${baseApiUrl}/feriados/${id}`, feriado)
-          .then((res) => {
-            this.listar();
-            this.alertaMensagem(`Feriado (${descricao}) Alterado.`);
-            return res;
-          })
-          .catch((error) => {
-            const erro = error.response.data.message;
-            this.$bvModal.msgBoxOk(
-              `Erro alterar Feriado: ${this.feriado.descricao} ${erro}`
-            );
-            this.listar();
-          });
-      }
       this.limparDados();
       this.$bvModal.hide("modalCadastro");
-    },
-    excluir(item, index) {
-      const feriado = item;
-
-      this.$bvModal
-        .msgBoxConfirm(feriado.descricao, {
-          title: "Deseja Excluir Esse Registro?",
-          size: "sm",
-          buttonSize: "sm",
-          okVariant: "danger",
-          okTitle: "Sim",
-          cancelTitle: "Não",
-          hideHeaderClose: false,
-          centered: true,
-        })
-        .then((value) => {
-          if (value) {
-            axios.delete(`${baseApiUrl}/feriados/${item.id}`).then((res) => {
-              this.listar();
-              this.alertaMensagem(`Feriado (${feriado.descricao}) Excluido.`);
-              return res;
-            });
-          }
-        })
-        .catch((err) => {
-          this.$bvModal.msgBoxOk(
-            `Erro excluir Feriado: ${this.feriado.nome} ${err}`
-          );
-        });
-    },
-    editar(item, index) {
-      this.diaAnterior = this.converterData(`${this.feriado.dia} 00:00`, false);
-      this.tituloModal = "ALTERAR";
-      this.feriado = item;
-
-      this.$bvModal.show("modalCadastro");
     },
     formatPrice(value) {
       let val = (value / 1).toFixed(2).replace(".", ",");
