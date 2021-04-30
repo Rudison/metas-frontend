@@ -192,7 +192,8 @@
 import moment from "moment";
 import { required, minLength } from "vuelidate/lib/validators";
 import axios from "axios";
-import { baseApiUrl } from "@/global";
+// import { baseApiUrl } from "@/global";
+import { baseApiUrl } from "../../global";
 
 export default {
   name: "MetasVendedorSemana",

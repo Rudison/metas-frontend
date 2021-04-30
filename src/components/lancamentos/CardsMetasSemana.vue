@@ -57,7 +57,7 @@
               variant="primary"
               v-b-tooltip.hover
               title="Imprimir Semana"
-              @click.stop="imprimir(metas.id)"
+              @click.stop="imprimir(metas)"
             >
               <b-icon icon="printer" aria-label="Editar"></b-icon>
             </b-button>
@@ -67,7 +67,7 @@
               variant="info"
               v-b-tooltip.hover
               title="Atualizar Semana(Blue)"
-              @click.stop="editar(metas.id)"
+              @click.stop="atualizarMetasBlue(metas)"
             >
               <b-icon icon="arrow-counterclockwise"></b-icon>
             </b-button>
@@ -96,13 +96,15 @@
         </b-card-footer>
       </b-card>
     </div>
+    <div id="viewer"></div>
   </div>
 </template>
 
 <script>
 import { required } from "vuelidate/lib/validators";
 import axios from "axios";
-import { baseApiUrl } from "@/global";
+// import { baseApiUrl } from "@/global";
+import { baseApiUrl } from "../../global";
 import moment from "moment";
 import MetasSemana from "./MetasSemana";
 import MetasVendedorSemana from "./MetasVendedorSemana";
@@ -116,6 +118,7 @@ export default {
   components: { MetasSemana, MetasVendedorSemana },
   mounted() {
     this.listar();
+    this.getVendedoresSemana();
   },
   data() {
     return {
@@ -137,6 +140,8 @@ export default {
       },
       descricao: "",
       info: false,
+      vendedoresMetaSemana: [{ codVendBLue: "" }],
+      valoresBlue: [],
     };
   },
   validations: {
@@ -162,8 +167,58 @@ export default {
       this.meta = meta;
       this.$bvModal.show("modalGridMetaSemana");
     },
-    imprimir(id) {
-      console.log("Imprimiu");
+    imprimir(metas) {},
+    atualizarMetasBlue(metas) {
+      let vendedorString = "";
+
+      this.vendedoresMetaSemana.forEach((vendedor) => {
+        vendedorString += vendedor.codVendBlue + ",";
+      });
+
+      const codVendedores = vendedorString.substring(
+        0,
+        vendedorString.length - 1
+      );
+
+      axios
+        .get(
+          `${baseApiUrl}/blue/getVendasBlue/${codVendedores}/'${metas.dataInicial}'/'${metas.dataFinal}'`
+        )
+        .then((res) => {
+          this.valoresBlue = res.data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      setTimeout(() => {
+        this.valoresBlue.forEach((valores) => {
+          this.atulalizarValorRealizado(
+            metas.semanaId,
+            valores.CodVend,
+            valores.ValorTotal
+          );
+        });
+      }, 500);
+    },
+    atulalizarValorRealizado(semanaId, codVendBLue, valorRealizado) {
+      console.log("entrou");
+      axios
+        .patch(
+          `${baseApiUrl}/metasVendedorSemana/valorRealizado/${this.metaId}/${semanaId}/${codVendBLue}`,
+          valorRealizado
+        )
+        .then((res) => {
+          this.listar();
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          this.$bvModal.msgBoxOk(
+            `Erro Alterar Valor Semana Vendedor: ${vendedor} ${erro}`
+          );
+          this.listar();
+        });
     },
     ultimaSemana(id) {
       const semanas = this.metasSemana.filter((m) => m.semanaId != 6);
@@ -191,6 +246,16 @@ export default {
         });
 
       this.$bvModal.hide("modalAno");
+    },
+    getVendedoresSemana() {
+      axios
+        .get(`${baseApiUrl}/metasVendedorMes/vendedoresSemana/${this.metaId}`)
+        .then((res) => {
+          this.vendedoresMetaSemana = res.data;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
     salvar() {
       const meta = {

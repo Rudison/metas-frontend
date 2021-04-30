@@ -216,7 +216,7 @@
 <script>
 import { required, minLength, maxLength } from "vuelidate/lib/validators";
 import axios from "axios";
-import { baseApiUrl } from "@/global";
+import { baseApiUrl } from "../../global";
 
 export default {
   name: "Vendedores",

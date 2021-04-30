@@ -90,7 +90,8 @@ import MetasVendedorMes from "./MetasVendedorMes";
 import CardsMetasSemana from "./CardsMetasSemana";
 
 import axios from "axios";
-import { baseApiUrl } from "@/global";
+// import { baseApiUrl } from "@/global";
+import { baseApiUrl } from "../../global";
 
 export default {
   props: {
