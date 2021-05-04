@@ -242,7 +242,7 @@
               size="sm"
               v-b-tooltip.hover
               title="Detalhes"
-              @click.prevent.stop="abrirInfo"
+              @click.prevent.stop="abrirInfo(m.id)"
             >
               <b-icon
                 :variant="!info ? 'outline-info' : 'outline-success'"
@@ -440,9 +440,22 @@ export default {
       this.limparDados();
       this.$bvModal.hide("modalCadastro");
     },
-    abrirInfo() {
+    abrirInfo(id) {
       this.info = !this.info;
       this.widthCard = !this.info ? "210px" : "220px";
+      this.atualizarMetaMensal(id);
+    },
+    atualizarMetaMensal(id) {
+      axios
+        .patch(`${baseApiUrl}/metas/percentual/${id}`)
+        .then((res) => {
+          this.listar();
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          console.log(erro);
+        });
     },
     alertaMensagem(mensagem = "") {
       this.$bvToast.toast(`${mensagem}`, {

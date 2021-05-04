@@ -63,6 +63,7 @@
             </b-button>
 
             <b-button
+              :disabled="isLoading"
               size="sm"
               variant="info"
               v-b-tooltip.hover
@@ -96,18 +97,22 @@
         </b-card-footer>
       </b-card>
     </div>
-    <div id="viewer"></div>
+    <table id="my-table">
+      <!-- ... -->
+    </table>
   </div>
 </template>
 
 <script>
 import { required } from "vuelidate/lib/validators";
 import axios from "axios";
-// import { baseApiUrl } from "@/global";
 import { baseApiUrl } from "../../global";
 import moment from "moment";
 import MetasSemana from "./MetasSemana";
 import MetasVendedorSemana from "./MetasVendedorSemana";
+
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 export default {
   name: "Lancamentos",
@@ -142,6 +147,8 @@ export default {
       info: false,
       vendedoresMetaSemana: [{ codVendBLue: "" }],
       valoresBlue: [],
+      isLoading: false,
+      relatorio: [],
     };
   },
   validations: {
@@ -167,8 +174,48 @@ export default {
       this.meta = meta;
       this.$bvModal.show("modalGridMetaSemana");
     },
-    imprimir(metas) {},
+    imprimir(metas) {
+      axios
+        .get(
+          `${baseApiUrl}/metasVendedorSemana/relatorio/${this.metaId}/${metas.semanaId}`
+        )
+        .then((res) => {
+          res.data.forEach((data) => {
+            this.relatorio.push(data);
+          });
+        })
+        .catch((error) => {
+          this.isLoading = false;
+          this.$bvModal.msgBoxOk(`Erro ao Imprimir Meta!`);
+        })
+        .finally(() => {
+          const doc = new jsPDF();
+
+          doc.text("QUADRO DE METAS", 80, 10);
+          doc.text("Mês - Janeiro", 10, 20);
+          doc.text(`Data Inicial: ${this.relatorio[0].dataInicial}`, 10, 30);
+
+          doc.line(10, 35, 200, 35); //linha
+
+          doc.autoTable({
+            styles: { fillColor: [76, 175, 80] },
+            theme: "striped",
+            margin: { top: 40 },
+            columns: [
+              { header: "Vendedor", datakey: "vendedor" },
+              { header: "Valor Realizado", datakey: "valorRealizado" },
+              { header: "Valor Previsto", datakey: "valorPrevisto" },
+              { header: "Percentual", datakey: "percentual" },
+            ],
+            body: [[teste]],
+          });
+          // doc.output("relatorioSemana.pdf");
+          window.open(doc.output("bloburl"), "_blank");
+          // doc.save("table.pdf")
+        });
+    },
     atualizarMetasBlue(metas) {
+      this.isLoading = true;
       let vendedorString = "";
 
       this.vendedoresMetaSemana.forEach((vendedor) => {
@@ -188,25 +235,28 @@ export default {
           this.valoresBlue = res.data;
         })
         .catch((error) => {
-          console.log(error);
+          this.isLoading = false;
+          this.$bvModal.msgBoxOk(`Erro ao Atualizar Metas!`);
+        })
+        .finally(() => {
+          this.valoresBlue.forEach((valores) => {
+            this.atulalizarValorRealizado(
+              metas.semanaId,
+              valores.CodVend,
+              valores.ValorTotal
+            );
+          });
+          this.$bvModal.msgBoxOk(`Semana Atualizada com Sucesso!`);
         });
-
-      setTimeout(() => {
-        this.valoresBlue.forEach((valores) => {
-          this.atulalizarValorRealizado(
-            metas.semanaId,
-            valores.CodVend,
-            valores.ValorTotal
-          );
-        });
-      }, 500);
     },
     atulalizarValorRealizado(semanaId, codVendBLue, valorRealizado) {
-      console.log("entrou");
+      const metaVendedor = {
+        valorRealizado,
+      };
       axios
         .patch(
           `${baseApiUrl}/metasVendedorSemana/valorRealizado/${this.metaId}/${semanaId}/${codVendBLue}`,
-          valorRealizado
+          metaVendedor
         )
         .then((res) => {
           this.listar();
@@ -218,6 +268,9 @@ export default {
             `Erro Alterar Valor Semana Vendedor: ${vendedor} ${erro}`
           );
           this.listar();
+        })
+        .finally(() => {
+          this.atualizarPercentual(semanaId);
         });
     },
     ultimaSemana(id) {
@@ -329,6 +382,30 @@ export default {
           this.$bvModal.msgBoxOk(
             `Erro excluir Meta: ${metasSemana[0].Mes} ${err}`
           );
+        });
+    },
+    atualizarPercentual(semanaId) {
+      const metaVendedor = {
+        metaId: this.metaId,
+        semanaId,
+        metaMensal: false,
+      };
+
+      axios
+        .patch(`${baseApiUrl}/metasVendedorSemana/percentual/`, metaVendedor)
+        .then((res) => {
+          this.listar();
+          return res;
+        })
+        .catch((error) => {
+          const erro = error.response.data.message;
+          this.$bvModal.msgBoxOk(
+            `Erro Alterar Valor Semana Vendedor: ${vendedor} ${erro}`
+          );
+          this.listar();
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     fecharModalCadastro() {
